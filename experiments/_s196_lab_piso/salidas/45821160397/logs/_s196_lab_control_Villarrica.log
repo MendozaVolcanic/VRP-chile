@@ -1,0 +1,2530 @@
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-01
+[diag 15:00:36Z] AUTH_START volcano=Villarrica date=2026-10-01
+[diag 15:00:36Z] AUTH_OK
+[diag 15:00:36Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:00:36Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10060410655,LAADS:10060029375]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START MODIS_AQUA
+[diag 15:00:36Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061305211,LAADS:10061303427]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_SNPP
+[diag 15:00:36Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10060450021,LAADS:10060446413]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_NOAA20
+[diag 15:00:36Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060278248,LAADS:10060274733]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060343144,LAADS:10060336702]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_NOAA21
+[diag 15:00:36Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10060259565,LAADS:10060256704]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:00:36Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10060450025,LAADS:10060446416]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:00:36Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060278252,LAADS:10060274734]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060343156,LAADS:10060336703]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:00:36Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:00:36Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:00:36Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:00:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10060259569,LAADS:10060256708]
+[diag 15:00:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-02
+[diag 15:06:06Z] AUTH_START volcano=Villarrica date=2026-10-02
+[diag 15:06:06Z] AUTH_OK
+[diag 15:06:06Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:06:06Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 0 of 1 granules (night filter)
+[diag 15:06:06Z] SEARCH_START MODIS_AQUA
+[diag 15:06:06Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061566879,LAADS:10061417090]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_SNPP
+[diag 15:06:06Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061290616,LAADS:10061289725]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_NOAA20
+[diag 15:06:06Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 1 of 4 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061302773,LAADS:10061298950]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_NOAA21
+[diag 15:06:06Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061267643,LAADS:10061262469]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061313037,LAADS:10061306871]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:06:06Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061290618,LAADS:10061289728]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:06:06Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 1 of 4 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061302785,LAADS:10061298952]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:06:06Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:06:06Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061267647,LAADS:10061262470]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061313043,LAADS:10061306875]
+[diag 15:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-03
+[diag 15:11:48Z] AUTH_START volcano=Villarrica date=2026-10-03
+[diag 15:11:48Z] AUTH_OK
+[diag 15:11:48Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:11:48Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10061997954,LAADS:10061791338]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START MODIS_AQUA
+[diag 15:11:48Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062130424,LAADS:10062097195]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_SNPP
+[diag 15:11:48Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+  VIIRS_SNPP: kept 2 of 4 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061980899,LAADS:10061979972]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062029966,LAADS:10062029458]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_NOAA20
+[diag 15:11:48Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061968249,LAADS:10061967648]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_NOAA21
+[diag 15:11:48Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061959019,LAADS:10061957769]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061987054,LAADS:10061986706]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:11:48Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+  VIIRS_SNPP_750: kept 2 of 4 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=4
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061980903,LAADS:10061979974]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062029976,LAADS:10062029460]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:11:48Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061968253,LAADS:10061967650]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:11:48Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:11:48Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061959025,LAADS:10061957774]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061987064,LAADS:10061986707]
+[diag 15:11:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-04
+[diag 15:18:43Z] AUTH_START volcano=Villarrica date=2026-10-04
+[diag 15:18:43Z] AUTH_OK
+[diag 15:18:43Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:18:43Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10062623033,LAADS:10062562616]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START MODIS_AQUA
+[diag 15:18:43Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764867,LAADS:10062678610]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764871,LAADS:10062729038]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_SNPP
+[diag 15:18:43Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062657802,LAADS:10062656753]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062676354,LAADS:10062668356]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_NOAA20
+[diag 15:18:43Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10062588611,LAADS:10062585655]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_NOAA21
+[diag 15:18:43Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10062573370,LAADS:10062572262]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10062605557,LAADS:10062602223]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:18:43Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062657812,LAADS:10062656758]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062676362,LAADS:10062668360]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:18:43Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10062588623,LAADS:10062585658]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:18:43Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:18:43Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10062573378,LAADS:10062572267]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10062605567,LAADS:10062602229]
+[diag 15:18:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-05
+[diag 15:25:40Z] AUTH_START volcano=Villarrica date=2026-10-05
+[diag 15:25:40Z] AUTH_OK
+[diag 15:25:40Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:25:40Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=4
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10063102555,LAADS:10062948046]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10063102563,LAADS:10063068542]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START MODIS_AQUA
+[diag 15:25:40Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065936839,LAADS:10065898349]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_SNPP
+[diag 15:25:40Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063099192,LAADS:10063098867]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063156972,LAADS:10063147711]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_NOAA20
+[diag 15:25:40Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063093060,LAADS:10063092624]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063111249,LAADS:10063106643]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_NOAA21
+[diag 15:25:40Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10063098446,LAADS:10063090450]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:25:40Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063099200,LAADS:10063098872]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063156980,LAADS:10063147716]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:25:40Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063093070,LAADS:10063092625]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063111261,LAADS:10063106644]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:40Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:25:40Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:25:40Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:25:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10063098448,LAADS:10063090452]
+[diag 15:25:40Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-06
+[diag 15:04:23Z] AUTH_START volcano=Villarrica date=2026-10-06
+[diag 15:04:23Z] AUTH_OK
+[diag 15:04:23Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:04:23Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10064611903,LAADS:10064197003]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START MODIS_AQUA
+[diag 15:04:23Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065990184,LAADS:10065947947]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_SNPP
+[diag 15:04:23Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10064891603,LAADS:10064878322]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_NOAA20
+[diag 15:04:23Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064494297,LAADS:10064491407]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064602178,LAADS:10064598461]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_NOAA21
+[diag 15:04:23Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10064473599,LAADS:10064468028]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:04:23Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10064891613,LAADS:10064878324]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:04:23Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064494301,LAADS:10064491408]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064602190,LAADS:10064598462]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:04:23Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:04:23Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:04:23Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:04:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10064473607,LAADS:10064468031]
+[diag 15:04:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-07
+[diag 15:11:46Z] AUTH_START volcano=Villarrica date=2026-10-07
+[diag 15:11:46Z] AUTH_OK
+[diag 15:11:46Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:11:46Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10066952475,LAADS:10066576425]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START MODIS_AQUA
+[diag 15:11:46Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10067380744,LAADS:10067073817]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_SNPP
+[diag 15:11:46Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10066963647,LAADS:10066876011]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_NOAA20
+[diag 15:11:46Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+  VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10066908175,LAADS:10066901235]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_NOAA21
+[diag 15:11:46Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 2 of 4 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=4
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10066727931,LAADS:10066714697]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10066872852,LAADS:10066869993]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:11:46Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10066963649,LAADS:10066876014]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:11:46Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+  VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10066908183,LAADS:10066901239]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:11:46Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 2 of 4 granules (night filter)
+[diag 15:11:46Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=4
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10066727933,LAADS:10066714700]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:11:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10066872860,LAADS:10066869994]
+[diag 15:11:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-07: VIIRS_NOAA21 | VJ202IMG.A2026280.0654.021.2026280114828.nc: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-08
+[diag 15:18:46Z] AUTH_START volcano=Villarrica date=2026-10-08
+[diag 15:18:46Z] AUTH_OK
+[diag 15:18:46Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:18:46Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10068786332,LAADS:10068379071]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START MODIS_AQUA
+[diag 15:18:46Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+  MODIS_AQUA: kept 1 of 4 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=4
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10069243980,LAADS:10069101320]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_SNPP
+[diag 15:18:46Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10068711629,LAADS:10068708395]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_NOAA20
+[diag 15:18:46Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10068738484,LAADS:10068644167]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_NOAA21
+[diag 15:18:46Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10068612241,LAADS:10068609666]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10068737412,LAADS:10068735168]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:18:46Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10068711633,LAADS:10068708397]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:18:46Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10068738486,LAADS:10068644170]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:18:46Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:18:46Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10068612245,LAADS:10068609671]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10068737416,LAADS:10068735171]
+[diag 15:18:46Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-09
+[diag 15:26:32Z] AUTH_START volcano=Villarrica date=2026-10-09
+[diag 15:26:32Z] AUTH_OK
+[diag 15:26:32Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:26:32Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10070294215,LAADS:10070030089]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START MODIS_AQUA
+[diag 15:26:32Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+  MODIS_AQUA: kept 3 of 4 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=4
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10070661377,LAADS:10070389838]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10070657059,LAADS:10070487368]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10070660064,LAADS:10070486328]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_SNPP
+[diag 15:26:32Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10070283571,LAADS:10070282231]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10070359490,LAADS:10070358206]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_NOAA20
+[diag 15:26:32Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10070228307,LAADS:10070225560]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_NOAA21
+[diag 15:26:32Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10070183218,LAADS:10070175784]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10070258484,LAADS:10070257659]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:26:32Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10070283577,LAADS:10070282235]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10070359494,LAADS:10070358210]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:26:32Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10070228313,LAADS:10070225561]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:26:32Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:26:32Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10070183222,LAADS:10070175785]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:26:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10070258490,LAADS:10070257663]
+[diag 15:26:32Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026282.0705.061.2026282200505.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS MYD021KM.A2026282.0840.061.2026282200200.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 2 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-09: MODIS_AQUA, MODIS_AQUA | MYD021KM.A2026282.0705.061.2026282200505.hdf: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-10
+[diag 15:35:50Z] AUTH_START volcano=Villarrica date=2026-10-10
+[diag 15:35:50Z] AUTH_OK
+[diag 15:35:50Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:35:50Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 0 of 2 granules (night filter)
+[diag 15:35:50Z] SEARCH_START MODIS_AQUA
+[diag 15:35:50Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10072790559,LAADS:10072770243]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_SNPP
+[diag 15:35:50Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10071334091,LAADS:10071333167]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10071372079,LAADS:10071368471]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_NOAA20
+[diag 15:35:50Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10071287563,LAADS:10071286243]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10071329156,LAADS:10071328348]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_NOAA21
+[diag 15:35:50Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 1 of 4 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=4
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10071310439,LAADS:10071309031]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:35:50Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10071334097,LAADS:10071333170]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10071372081,LAADS:10071368473]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:35:50Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10071287567,LAADS:10071286245]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10071329166,LAADS:10071328351]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:50Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:35:50Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 1 of 4 granules (night filter)
+[diag 15:35:50Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=4
+[diag 15:35:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10071310449,LAADS:10071309034]
+[diag 15:35:50Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-11
+[diag 15:07:07Z] AUTH_START volcano=Villarrica date=2026-10-11
+[diag 15:07:07Z] AUTH_OK
+[diag 15:07:07Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:07:07Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10071860677,LAADS:10071682684]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START MODIS_AQUA
+[diag 15:07:07Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10072851616,LAADS:10072792423]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START VIIRS_SNPP
+[diag 15:07:07Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10071882041,LAADS:10071880965]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START VIIRS_NOAA20
+[diag 15:07:07Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10071831497,LAADS:10071831004]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10071857937,LAADS:10071857549]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START VIIRS_NOAA21
+[diag 15:07:07Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10071823320,LAADS:10071820344]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:07:07Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:07:07Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:07:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10071882053,LAADS:10071880967]
+[diag 15:07:07Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:07Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:07:07Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:07:08Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:07:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10071831501,LAADS:10071831006]
+[diag 15:07:08Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10071857953,LAADS:10071857550]
+[diag 15:07:08Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:07:08Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:07:08Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:07:08Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:07:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10071823334,LAADS:10071820349]
+[diag 15:07:08Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-12
+[diag 15:13:31Z] AUTH_START volcano=Villarrica date=2026-10-12
+[diag 15:13:31Z] AUTH_OK
+[diag 15:13:31Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:13:31Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10072694330,LAADS:10072694052]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START MODIS_AQUA
+[diag 15:13:31Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 2 of 2 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10072879831,LAADS:10072826679]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10072897234,LAADS:10072847939]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_SNPP
+[diag 15:13:31Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10080569798,LAADS:10080538440]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_NOAA20
+[diag 15:13:31Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10078518084,LAADS:10078506295]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10078532305,LAADS:10078514118]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_NOAA21
+[diag 15:13:31Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10080509617,LAADS:10080506431]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:13:31Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10080569830,LAADS:10080538467]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:13:31Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10078518116,LAADS:10078506299]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10078532331,LAADS:10078514122]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:13:31Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:13:31Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:13:31Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:13:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10080509623,LAADS:10080506497]
+[diag 15:13:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026285.0900.061.2026286024539.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-12: MODIS_AQUA | MYD021KM.A2026285.0900.061.2026286024539.hdf: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-13
+[diag 15:19:55Z] AUTH_START volcano=Villarrica date=2026-10-13
+[diag 15:19:55Z] AUTH_OK
+[diag 15:19:55Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:19:55Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+  MODIS_TERRA: kept 2 of 3 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10073318541,LAADS:10073185158]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10073318542,LAADS:10073185138]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] SEARCH_START MODIS_AQUA
+[diag 15:19:55Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10074336085,LAADS:10074333738]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] SEARCH_START VIIRS_SNPP
+[diag 15:19:55Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+  VIIRS_SNPP: kept 0 of 2 granules (night filter)
+[diag 15:19:55Z] SEARCH_START VIIRS_NOAA20
+[diag 15:19:55Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 1 of 4 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10087035810,LAADS:10087020855]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] SEARCH_START VIIRS_NOAA21
+[diag 15:19:55Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10087006980,LAADS:10086970266]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10087007174,LAADS:10086970269]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:19:55Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+  VIIRS_SNPP_750: kept 0 of 2 granules (night filter)
+[diag 15:19:55Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:19:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 1 of 4 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10087035818,LAADS:10087020863]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:19:55Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:19:55Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10087007022,LAADS:10086970315]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:19:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10087007210,LAADS:10086970319]
+[diag 15:19:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-14
+[diag 15:25:48Z] AUTH_START volcano=Villarrica date=2026-10-14
+[diag 15:25:48Z] AUTH_OK
+[diag 15:25:48Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:25:48Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10074364314,LAADS:10074310226]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START MODIS_AQUA
+[diag 15:25:48Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10074688966,LAADS:10074681637]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_SNPP
+[diag 15:25:48Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10074371991,LAADS:10074365142]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10074545396,LAADS:10074537303]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_NOAA20
+[diag 15:25:48Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10074323500,LAADS:10074321751]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_NOAA21
+[diag 15:25:48Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 3 of 4 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=4
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10074326426,LAADS:10074324462]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10074351325,LAADS:10074349928]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10074351371,LAADS:10074349824]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:25:48Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10074371999,LAADS:10074365147]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10074545414,LAADS:10074537319]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:25:48Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10074323506,LAADS:10074321753]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:25:48Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 3 of 4 granules (night filter)
+[diag 15:25:48Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=4
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10074326438,LAADS:10074324464]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10074351331,LAADS:10074349932]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10074351385,LAADS:10074349828]
+[diag 15:25:48Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-15
+[diag 15:34:56Z] AUTH_START volcano=Villarrica date=2026-10-15
+[diag 15:34:56Z] AUTH_OK
+[diag 15:34:56Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:34:56Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=4
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10075511304,LAADS:10075285992]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10075511309,LAADS:10075335804]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START MODIS_AQUA
+[diag 15:34:56Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10076032461,LAADS:10075582572]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_SNPP
+[diag 15:34:56Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+  VIIRS_SNPP: kept 3 of 4 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10075522923,LAADS:10075520643]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10075550516,LAADS:10075549879]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10075550517,LAADS:10075549689]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_NOAA20
+[diag 15:34:56Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 2 of 4 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10075400892,LAADS:10075400493]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10075507858,LAADS:10075507773]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_NOAA21
+[diag 15:34:56Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+  VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10075498361,LAADS:10075498078]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:34:56Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+  VIIRS_SNPP_750: kept 3 of 4 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=4
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10075522935,LAADS:10075520646]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10075550528,LAADS:10075549881]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10075550529,LAADS:10075549690]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:34:56Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 2 of 4 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10075400894,LAADS:10075400498]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10075507860,LAADS:10075507776]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:34:56Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:34:56Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+  VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+[diag 15:34:56Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+[diag 15:34:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10075498365,LAADS:10075498083]
+[diag 15:34:56Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-15: VIIRS_SNPP | VNP02IMG.A2026288.0636.002.2026288144444.nc: el procesador no devolvió record
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-16
+[diag 15:08:57Z] AUTH_START volcano=Villarrica date=2026-10-16
+[diag 15:08:57Z] AUTH_OK
+[diag 15:08:57Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:08:57Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10077942662,LAADS:10077153013]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START MODIS_AQUA
+[diag 15:08:57Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10078611903,LAADS:10078435907]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_SNPP
+[diag 15:08:57Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10077798265,LAADS:10077783893]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10078169223,LAADS:10078150992]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_NOAA20
+[diag 15:08:57Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10077643006,LAADS:10077634785]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10077975669,LAADS:10077949853]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_NOAA21
+[diag 15:08:57Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10077580793,LAADS:10077558067]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:08:57Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10077798275,LAADS:10077783895]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10078169239,LAADS:10078150993]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:08:57Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10077643014,LAADS:10077634788]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10077975675,LAADS:10077949856]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:08:57Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:08:57Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:08:57Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:08:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10077580805,LAADS:10077558069]
+[diag 15:08:57Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-17
+[diag 15:16:55Z] AUTH_START volcano=Villarrica date=2026-10-17
+[diag 15:16:55Z] AUTH_OK
+[diag 15:16:55Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:16:55Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10079513486,LAADS:10079450944]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START MODIS_AQUA
+[diag 15:16:55Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10085482625,LAADS:10085479911]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10080313293,LAADS:10080312941]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_SNPP
+[diag 15:16:55Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10079539171,LAADS:10079538353]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_NOAA20
+[diag 15:16:55Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 3 of 4 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10079482614,LAADS:10079481240]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10079509210,LAADS:10079504557]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10079509211,LAADS:10079504057]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_NOAA21
+[diag 15:16:55Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10079478783,LAADS:10079478161]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:16:55Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10079539179,LAADS:10079538354]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:16:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 3 of 4 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10079482620,LAADS:10079481243]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10079509222,LAADS:10079504558]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10079509223,LAADS:10079504060]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:16:55Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:16:55Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:16:55Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:16:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10079478791,LAADS:10079478164]
+[diag 15:16:55Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-18
+[diag 15:24:38Z] AUTH_START volcano=Villarrica date=2026-10-18
+[diag 15:24:38Z] AUTH_OK
+[diag 15:24:38Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:24:38Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10079991249,LAADS:10079879891]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START MODIS_AQUA
+[diag 15:24:38Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10080316891,LAADS:10080314279]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_SNPP
+[diag 15:24:38Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10079953620,LAADS:10079941765]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_NOAA20
+[diag 15:24:38Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10079965938,LAADS:10079958714]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_NOAA21
+[diag 15:24:38Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10079926025,LAADS:10079925916]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10079985285,LAADS:10079979886]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:24:38Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10079953624,LAADS:10079941767]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:24:38Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10079965946,LAADS:10079958716]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:24:38Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:24:38Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10079926029,LAADS:10079925918]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10079985293,LAADS:10079979890]
+[diag 15:24:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-19
+[diag 15:31:31Z] AUTH_START volcano=Villarrica date=2026-10-19
+[diag 15:31:31Z] AUTH_OK
+[diag 15:31:31Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:31:31Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+  MODIS_TERRA: kept 1 of 3 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=3
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10080466314,LAADS:10080438085]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START MODIS_AQUA
+[diag 15:31:31Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10080946556,LAADS:10080613282]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_SNPP
+[diag 15:31:31Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+  VIIRS_SNPP: kept 2 of 4 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=4
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10080447890,LAADS:10080447694]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10080571754,LAADS:10080553333]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_NOAA20
+[diag 15:31:31Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10080444365,LAADS:10080443856]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_NOAA21
+[diag 15:31:31Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10080443084,LAADS:10080442875]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10080449106,LAADS:10080448877]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:31:31Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+  VIIRS_SNPP_750: kept 2 of 4 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=4
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10080447894,LAADS:10080447697]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10080571784,LAADS:10080553338]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:31:31Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10080444379,LAADS:10080443859]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:31:31Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:31:31Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10080443092,LAADS:10080442879]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:31:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10080449116,LAADS:10080448879]
+[diag 15:31:31Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-20
+[diag 15:39:03Z] AUTH_START volcano=Villarrica date=2026-10-20
+[diag 15:39:03Z] AUTH_OK
+[diag 15:39:03Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:39:03Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=4
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10081470984,LAADS:10081166071]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10081470993,LAADS:10081225547]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] SEARCH_START MODIS_AQUA
+[diag 15:39:03Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10082363311,LAADS:10082355132]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] SEARCH_START VIIRS_SNPP
+[diag 15:39:03Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+  VIIRS_SNPP: kept 0 of 1 granules (night filter)
+[diag 15:39:03Z] SEARCH_START VIIRS_NOAA20
+[diag 15:39:03Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10081284121,LAADS:10081267048]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] SEARCH_START VIIRS_NOAA21
+[diag 15:39:03Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10081261750,LAADS:10081259137]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10081437060,LAADS:10081423013]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:39:03Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+  VIIRS_SNPP_750: kept 0 of 1 granules (night filter)
+[diag 15:39:03Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:39:03Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10081284137,LAADS:10081267050]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:39:03Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:39:03Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10081261764,LAADS:10081259148]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10081437062,LAADS:10081423016]
+[diag 15:39:03Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-21
+[diag 15:09:24Z] AUTH_START volcano=Villarrica date=2026-10-21
+[diag 15:09:24Z] AUTH_OK
+[diag 15:09:24Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:09:24Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10084279830,LAADS:10083749156]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START MODIS_AQUA
+[diag 15:09:24Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10085336042,LAADS:10085318392]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_SNPP
+[diag 15:09:24Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10084303086,LAADS:10084291300]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10084507883,LAADS:10084483773]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_NOAA20
+[diag 15:09:24Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10084012097,LAADS:10083998181]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10084456024,LAADS:10084442329]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_NOAA21
+[diag 15:09:24Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10084212656,LAADS:10083982683]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:09:24Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10084303088,LAADS:10084291302]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10084507885,LAADS:10084483774]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:09:24Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10084012111,LAADS:10083998188]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10084456026,LAADS:10084442330]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:09:24Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:09:24Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:09:24Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:09:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10084212658,LAADS:10083982685]
+[diag 15:09:24Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-22
+[diag 15:18:13Z] AUTH_START volcano=Villarrica date=2026-10-22
+[diag 15:18:13Z] AUTH_OK
+[diag 15:18:13Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:18:13Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10086548927,LAADS:10086384556]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START MODIS_AQUA
+[diag 15:18:13Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+  MODIS_AQUA: kept 2 of 4 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=4
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10088854650,LAADS:10088847097]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10088840971,LAADS:10088823179]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_SNPP
+[diag 15:18:13Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10086683463,LAADS:10086678919]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_NOAA20
+[diag 15:18:13Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10086448315,LAADS:10086446027]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10086530499,LAADS:10086524782]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_NOAA21
+[diag 15:18:13Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10086450713,LAADS:10086446545]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:18:13Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10086683471,LAADS:10086678922]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:18:13Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10086448327,LAADS:10086446028]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10086530503,LAADS:10086524784]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:18:13Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:18:13Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:18:13Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:18:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10086450743,LAADS:10086446547]
+[diag 15:18:13Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026295.0705.061.2026296032229.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-22: MODIS_AQUA | MYD021KM.A2026295.0705.061.2026296032229.hdf: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-23
+[diag 15:25:41Z] AUTH_START volcano=Villarrica date=2026-10-23
+[diag 15:25:41Z] AUTH_OK
+[diag 15:25:41Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:25:41Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10090461364,LAADS:10089367179]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START MODIS_AQUA
+[diag 15:25:41Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10092066300,LAADS:10091238873]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_SNPP
+[diag 15:25:41Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10090577788,LAADS:10090295500]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_NOAA20
+[diag 15:25:41Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+  VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10090447342,LAADS:10090439198]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_NOAA21
+[diag 15:25:41Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 2 of 4 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=4
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10089961142,LAADS:10089945474]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10090294165,LAADS:10090277285]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:25:41Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10090577790,LAADS:10090295501]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:25:41Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+  VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10090447344,LAADS:10090439200]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:25:41Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 2 of 4 granules (night filter)
+[diag 15:25:41Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=4
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10089961154,LAADS:10089945477]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:25:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10090294169,LAADS:10090277286]
+[diag 15:25:41Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-23: VIIRS_NOAA21 | VJ202IMG.A2026296.0654.021.2026296122745.nc: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-24
+[diag 15:32:47Z] AUTH_START volcano=Villarrica date=2026-10-24
+[diag 15:32:47Z] AUTH_OK
+[diag 15:32:47Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:32:47Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10095812782,LAADS:10095137298]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START MODIS_AQUA
+[diag 15:32:47Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10096324217,LAADS:10096182123]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10096324218,LAADS:10096182125]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_SNPP
+[diag 15:32:47Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10095604533,LAADS:10095589576]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_NOAA20
+[diag 15:32:47Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10095679723,LAADS:10095471704]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_NOAA21
+[diag 15:32:47Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10095252677,LAADS:10095232026]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10095676730,LAADS:10095668581]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:32:47Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10095604535,LAADS:10095589577]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:32:47Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10095679725,LAADS:10095471706]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:32:47Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:32:47Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10095252679,LAADS:10095232029]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10095676740,LAADS:10095668584]
+[diag 15:32:47Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026297.0825.061.2026297190930.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-24: MODIS_AQUA | MYD021KM.A2026297.0825.061.2026297190930.hdf: el procesador no devolvió record
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-25
+[diag 15:40:43Z] AUTH_START volcano=Villarrica date=2026-10-25
+[diag 15:40:43Z] AUTH_OK
+[diag 15:40:43Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:40:43Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=4
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10097451516,LAADS:10096922475]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10097451521,LAADS:10097157714]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START MODIS_AQUA
+[diag 15:40:43Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10097791800,LAADS:10097581324]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10097791808,LAADS:10097682184]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_SNPP
+[diag 15:40:43Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10097552647,LAADS:10097550177]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10097603402,LAADS:10097595239]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_NOAA20
+[diag 15:40:43Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10097360125,LAADS:10097354939]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_NOAA21
+[diag 15:40:43Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10097301239,LAADS:10097290719]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10097394474,LAADS:10097391992]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:40:43Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10097552653,LAADS:10097550179]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10097603414,LAADS:10097595244]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:40:43Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10097360129,LAADS:10097354940]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:40:43Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:40:43Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10097301245,LAADS:10097290722]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:40:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10097394488,LAADS:10097391995]
+[diag 15:40:43Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS MYD021KM.A2026298.0900.061.2026298190919.hdf: sin record (vía encendida: descarte de borde de la vía, 171-01, o volcán fuera del gránulo)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura NO COMPLETA: 1 incidencias (ninguna búsqueda ni descarga fallida).
+  gránulo procesado sin record, sin juicio (descarte de borde o volcán fuera del gránulo); no cuenta en modo estricto:
+    Villarrica 2026-10-25: MODIS_AQUA | MYD021KM.A2026298.0900.061.2026298190919.hdf: el procesador no devolvió record
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-26
+[diag 15:15:27Z] AUTH_START volcano=Villarrica date=2026-10-26
+[diag 15:15:27Z] AUTH_OK
+[diag 15:15:27Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:15:27Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10098883556,LAADS:10098465910]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START MODIS_AQUA
+[diag 15:15:27Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10099373845,LAADS:10099083184]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_SNPP
+[diag 15:15:27Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10098888955,LAADS:10098888776]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10098947238,LAADS:10098947119]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_NOAA20
+[diag 15:15:27Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10098839806,LAADS:10098833064]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10098888707,LAADS:10098888467]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_NOAA21
+[diag 15:15:27Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10098877324,LAADS:10098877371]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:15:27Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10098888969,LAADS:10098888784]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10098947254,LAADS:10098947136]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:15:27Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10098839810,LAADS:10098833070]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10098888713,LAADS:10098888474]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:15:27Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:15:27Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:15:27Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:15:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10098877336,LAADS:10098877390]
+[diag 15:15:27Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-27
+[diag 15:24:23Z] AUTH_START volcano=Villarrica date=2026-10-27
+[diag 15:24:23Z] AUTH_OK
+[diag 15:24:23Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:24:23Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10099905730,LAADS:10099809603]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START MODIS_AQUA
+[diag 15:24:23Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10100285560,LAADS:10100255238]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_SNPP
+[diag 15:24:23Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+  VIIRS_SNPP: kept 1 of 2 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10108341530,LAADS:10108334140]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_NOAA20
+[diag 15:24:23Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10104285000,LAADS:10104279488]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10104284824,LAADS:10104278666]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_NOAA21
+[diag 15:24:23Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10109364111,LAADS:10109363134]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:24:23Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+  VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10108341566,LAADS:10108334196]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:24:23Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10104285030,LAADS:10104279511]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10104284860,LAADS:10104278684]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:24:23Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:24:23Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:24:23Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:24:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10109364145,LAADS:10109363197]
+[diag 15:24:23Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-28
+[diag 15:32:00Z] AUTH_START volcano=Villarrica date=2026-10-28
+[diag 15:32:00Z] AUTH_OK
+[diag 15:32:00Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:32:00Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10100643935,LAADS:10100623785]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START MODIS_AQUA
+[diag 15:32:00Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10100848708,LAADS:10100637679]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_SNPP
+[diag 15:32:00Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10101761810,LAADS:10101746580]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_NOAA20
+[diag 15:32:00Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10101768868,LAADS:10101762830]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10101794749,LAADS:10101789155]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_NOAA21
+[diag 15:32:00Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10101953542,LAADS:10101942881]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:32:00Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10101761820,LAADS:10101746585]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:32:00Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10101768874,LAADS:10101762843]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10101794769,LAADS:10101789160]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:32:00Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:32:00Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 15:32:00Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:32:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10101953566,LAADS:10101942885]
+[diag 15:32:00Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-29
+[diag 15:39:36Z] AUTH_START volcano=Villarrica date=2026-10-29
+[diag 15:39:36Z] AUTH_OK
+[diag 15:39:36Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:39:36Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10101894090,LAADS:10101629390]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START MODIS_AQUA
+[diag 15:39:36Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10102528192,LAADS:10102383337]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_SNPP
+[diag 15:39:36Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10101980287,LAADS:10101953665]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_NOAA20
+[diag 15:39:36Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10102404394,LAADS:10102393621]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_NOAA21
+[diag 15:39:36Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10102511028,LAADS:10102493857]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10101979941,LAADS:10101953342]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:39:36Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10101980297,LAADS:10101953670]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:39:36Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10102404396,LAADS:10102393624]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:39:36Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:39:36Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10102511038,LAADS:10102493880]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:39:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10101979965,LAADS:10101953356]
+[diag 15:39:36Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-30
+[diag 15:47:38Z] AUTH_START volcano=Villarrica date=2026-10-30
+[diag 15:47:38Z] AUTH_OK
+[diag 15:47:38Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:47:38Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=4
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10103692347,LAADS:10103195804]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10103692355,LAADS:10103356927]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START MODIS_AQUA
+[diag 15:47:38Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10104166667,LAADS:10103910461]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10104165263,LAADS:10103987081]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_SNPP
+[diag 15:47:38Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10103781749,LAADS:10103777431]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10103862736,LAADS:10103852090]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_NOAA20
+[diag 15:47:38Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10103447209,LAADS:10103439516]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_NOAA21
+[diag 15:47:38Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10103469700,LAADS:10103457054]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10103641333,LAADS:10103624809]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:47:38Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10103781759,LAADS:10103777435]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10103862742,LAADS:10103852102]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:47:38Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10103447219,LAADS:10103439520]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:47:38Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 15:47:38Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=3
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10103469702,LAADS:10103457056]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:47:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10103641343,LAADS:10103624812]
+[diag 15:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
+FLAGS_BRAZO {"PROFILE_NAME": "_s196_lab_control", "DATA_SUBDIR": "_s196_lab_control", "ENABLE_LAB_ZONA_A": true, "LAB_ZONA_A": {"extension": "MEJ-5", "radio": "inner_radius_km", "parametro": "sigma_contextual_nocturno", "valor": 5.0, "piso": 0.003, "volcanes_fuera": ["PuyehueCordonCaulle"]}, "ENABLE_MODIS_CODIGO_MIROVA": true, "ENABLE_V375_CODIGO_MIROVA": true, "ENABLE_V750_CODIGO_MIROVA": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_DAYTIME_VIIRS": false, "ENABLE_TEST1_PATH": false, "ENABLE_TESTS_23_PROSE_BRANCH": true, "ENABLE_MODIS_B22_PRIMARY": true}
+[VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control
+=== [VRP profile=_s196_lab_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s196_lab_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Villarrica | 2026-10-31
+[diag 15:35:02Z] AUTH_START volcano=Villarrica date=2026-10-31
+[diag 15:35:02Z] AUTH_OK
+[diag 15:35:02Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 15:35:02Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE MODIS_TERRA n_geo=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10106071801,LAADS:10105566010]
+/opt/hostedtoolcache/Python/3.11.18/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START MODIS_AQUA
+[diag 15:35:02Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE MODIS_AQUA n_geo=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10107122021,LAADS:10107119525]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_SNPP
+[diag 15:35:02Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_SNPP n_geo=3
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10106055106,LAADS:10106051008]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10106196216,LAADS:10106191136]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_NOAA20
+[diag 15:35:02Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+  VIIRS_NOAA20: kept 2 of 4 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_NOAA20 n_geo=4
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10105921600,LAADS:10105919912]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10106024500,LAADS:10106020403]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_NOAA21
+[diag 15:35:02Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+  VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_NOAA21 n_geo=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10105992210,LAADS:10105985378]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_SNPP_750
+[diag 15:35:02Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_SNPP_750 n_geo=3
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10106055110,LAADS:10106051011]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10106196218,LAADS:10106191137]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_NOAA20_750
+[diag 15:35:02Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+  VIIRS_NOAA20_750: kept 2 of 4 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_NOAA20_750 n_geo=4
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10105921604,LAADS:10105919914]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10106024510,LAADS:10106020404]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+[diag 15:35:02Z] SEARCH_START VIIRS_NOAA21_750
+[diag 15:35:02Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+  VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+[diag 15:35:02Z] SEARCH_GEO_DONE VIIRS_NOAA21_750 n_geo=2
+[diag 15:35:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10105992218,LAADS:10105985379]
+[diag 15:35:02Z] DOWNLOAD_DONE attempt=0 elapsed=0.0s n_files=2
+  MODIS_TERRA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  MODIS_AQUA | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA20 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_NOAA21 (375m) | VRP_MIR=None MW | VRP_TIR=None MW | T_max=None K | VRP_VENT=0.0 MW (Nonepx)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=None K | T_max=None K | anomalous_px=0
+Cobertura: completa (ninguna búsqueda ni descarga fallida, ninguna incidencia).
+
+Done.
