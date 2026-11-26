@@ -42,7 +42,8 @@ MUTACIONES = {
                                   "quedan = [r for r in recs if not rechaza_como_laboratorio(r, vol, dia)]"),
     # S200c (R4FD-107, acta de la ronda 4)
     "107_acepta_otro_fin": ("    if fin != FIN_SELLADO:\n", "    if False:\n"),
-    "107_sin_muestra": ('"muestra": muestra})', '"muestra": {}})'),
+    # S202: la salida agrega "exclusion_comun" después de "muestra"; la mutación es la misma.
+    "107_sin_muestra": ('"muestra": muestra,', '"muestra": {},'),
     "105_sin_codigo": ('elif not cod["igual"]:', "elif False:"),
     "105_sin_declarar": ('codigos.setdefault(str(sha),', 'codigos.setdefault("uno",'),
     "106_sin_procedencia": ("referencia = {n: _sha256(Path(dest) / n) for n in CSV_REFERENCIA if (Path(dest) / n).exists()}",
