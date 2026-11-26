@@ -467,7 +467,16 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         oficiales = dict(tasas, prod=tasas_prod)
         replica_igual = all(cuentas.get(k) == tuple(oficiales[k]["NOCHE"]) for k in originales)
     n_neg_control = (tasas.get(CONTROL) or {}).get("NOCHE", (0, 0))[1]
+    # Freno 3 (decisión de Nicolás del 2026-11-26, «Agregar freno 3», tras el verificador del re-sello, R202V-1). POR
+    # QUÉ: con los frenos 1 y 2 en verde, lo único que la exclusión mueve son publicaciones quitadas (noches que siguen
+    # en el denominador y dejan de publicar), así que sólo puede bajar la tasa de un brazo y, con ella, el piso elegido:
+    # un sesgo hacia bajar el umbral, el riesgo que el laboratorio tiene que evitar. Se elige también con esas
+    # publicaciones devueltas a cada brazo; si la elección cambia, la exclusión decidió el piso e INVÁLIDO.
+    devueltas = {k: dict(v, NOCHE=(v["NOCHE"][0] + pub_quitadas.get(str(k), 0), v["NOCHE"][1]))
+                 for k, v in tasas.items() if "NOCHE" in v}
+    eleccion_devueltas = elegir_piso(devueltas)
     exclusion = {"n": len(contables), "n_total": len(excluidas), "tope": TOPE_EXCLUIDAS,
+                 "eleccion_con_publicaciones_devueltas": {k: eleccion_devueltas[k] for k in ("estado", "valor")},
                  "noches_negativas_control": n_neg_control, "decisivas": decisivas,
                  "publicaciones_quitadas": pub_quitadas, "replica_por_noche_igual": replica_igual,
                  "records_quitados": records_quitados,
@@ -506,6 +515,11 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         res = {"estado": INVALIDO, "valor": None,
                "detalle": "%d escenas excluidas por validez distinta entre brazos pasan del 1 %% de las %d noches "
                           "negativas del control: freno 2 del re-sello S202 (R5C-101)" % (len(contables), n_neg_control)}
+    elif (eleccion_devueltas["estado"], eleccion_devueltas["valor"]) != (res["estado"], res["valor"]):
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "las publicaciones quitadas por la exclusión cambian la elección (%s %s con ellas devueltas, "
+                          "%s %s sin ellas): la exclusión decidiría el piso; freno 3 del re-sello S202 (R202V-1)"
+                          % (eleccion_devueltas["estado"], eleccion_devueltas["valor"], res["estado"], res["valor"])}
     # Re-sello S200b (verificador de #1129): el poder cuenta sólo los records de la ventana de calibración donde la zona
     # no actúa (la identidad sigue mirando todos), y SIN PODER no tapa un INVALIDO que ya dio elegir_piso (por ejemplo,
     # tasa no monótona: un instrumento roto se informa como roto).

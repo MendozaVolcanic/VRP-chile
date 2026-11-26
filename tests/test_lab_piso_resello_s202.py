@@ -311,6 +311,63 @@ def test_freno_2_dos_excluidas_en_120_noches_es_invalido(tmp_path, monkeypatch):
     assert r["exclusion_comun"]["n"] == 2
 
 
+# ----------------------------------------------------------------------------------------------- freno 3
+# Decisión de Nicolás del 2026-11-26 («Agregar freno 3»), tras el verificador del re-sello (R202V-1): con los frenos 1 y
+# 2 en verde, la exclusión sólo puede quitar publicaciones, así que sólo puede bajar el piso elegido. INVÁLIDO si la
+# elección cambia al devolver a cada brazo las publicaciones quitadas.
+def test_freno_3_publicacion_quitada_que_baja_el_piso_es_invalido(tmp_path, monkeypatch):
+    """Camino inverso VIIRS 375 con 0,002 en el borde: 36 noches MODIS publicadas más la noche que publica sólo la
+    pasada VIIRS que el control no midió dan 37 de 120 (sobre el 30 %). La exclusión la quita, 0,002 queda en 36 (el
+    30 % exacto) y se elegiría 0,002 en vez de 0,00225. Freno 3: INVÁLIDO."""
+    monkeypatch.setitem(N_PUB, 0.002, 36)
+
+    def cambiar(data, filas):
+        _con_viirs(data, filas, NOCHE_X)
+        for k in data:
+            v = data[k]["Lascar"][-1]
+            if k in (0.002, 0.00175, 0.0015):
+                v.update(_rec(v["datetime_utc"], pub=True, sensor="VIIRS_NOAA20"))
+            else:
+                _invalida(v, "crater_no_evaluado")
+    r = _correr(tmp_path, monkeypatch, cambiar)
+    assert r["estado"] == M.INVALIDO and "freno 3" in r["detalle"], r["detalle"]
+    assert r["exclusion_comun"]["eleccion_con_publicaciones_devueltas"]["valor"]["piso_a"] == 0.00225
+
+
+def test_freno_3_gemelo_la_publicacion_quitada_no_mueve_el_piso(tmp_path, monkeypatch):
+    """El mismo caso con 0,002 lejos del corte (42 de 120): quitar la publicación no cambia la elección."""
+    def cambiar(data, filas):
+        _con_viirs(data, filas, NOCHE_X)
+        for k in data:
+            v = data[k]["Lascar"][-1]
+            if k in (0.002, 0.00175, 0.0015):
+                v.update(_rec(v["datetime_utc"], pub=True, sensor="VIIRS_NOAA20"))
+            else:
+                _invalida(v, "crater_no_evaluado")
+    r = _correr(tmp_path, monkeypatch, cambiar)
+    assert r["estado"] == "ELEGIDO" and r["valor"]["piso_a"] == 0.00225, r["detalle"]
+    dev = r["exclusion_comun"]["eleccion_con_publicaciones_devueltas"]
+    assert (dev["estado"], dev["valor"]) == (r["estado"], r["valor"])
+
+
+def test_freno_3_compara_tambien_el_estado(tmp_path, monkeypatch):
+    """Caso K6 del verificador (R202V-6): la publicación quitada es del control. Con ella el control supera el 30 % (SIN
+    VALOR); sin ella el control cumple pero el primer piso no (SIN VALOR DE PISO). Ninguno elige piso: el freno 3 tiene
+    que ver el cambio de estado, no sólo el del piso."""
+    for k, n in zip(M.CAMINO, [36, 37, 38, 39, 40, 42, 54, 75]):
+        monkeypatch.setitem(N_PUB, k, n)
+
+    def cambiar(data, filas):
+        _con_viirs(data, filas, NOCHE_X)
+        for k in ("sin_zona", M.CONTROL, "prod"):
+            data[k]["Lascar"][NOCHE_X].update(_rec(FECHAS[NOCHE_X], pub=True))
+        _modis_invalida_en(data, NOCHE_X, list(M.GRILLA_PISO))
+    r = _correr(tmp_path, monkeypatch, cambiar)
+    assert r["estado"] == M.INVALIDO and "freno 3" in r["detalle"], r["detalle"]
+    assert r["exclusion_comun"]["eleccion_con_publicaciones_devueltas"]["estado"] == "SIN VALOR"
+    assert r["exclusion_comun"]["publicaciones_quitadas"].get(M.CONTROL) == 1
+
+
 # ----------------------------------------------------------------------------------------------- réplica por noche
 def test_replica_por_noche_que_no_coincide_con_tasas_barrido_invalida(tmp_path, monkeypatch):
     """La regla de los frenos mira las noches con una réplica del conteo de E.tasas_barrido; si la réplica no da las

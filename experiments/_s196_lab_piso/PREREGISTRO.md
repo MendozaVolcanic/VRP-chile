@@ -20,8 +20,9 @@
 >
 > ⚠️ **Re-sello S202 (2026-11-26), antes de calcular ninguna tasa del barrido.** Nicolás aprobó el arreglo (a) de
 > R5C-101 (ronda 5 de Codex, cierre) con «Sí, re-séllalo así» (2026-11-26): muestra común entre brazos, con dos frenos
-> sellados; qué cambió y por qué, en el §5c. Sello vigente (S202):
-> sha256 del evaluador (fin de línea LF): `dfe898649efe0c7ab92842dfe12fa88bd1d17b06af0632e4d1c0ade0bc5de540`.
+> sellados, y agregó un tercero tras el verificador («Agregar freno 3», 2026-11-26); qué cambió y por qué, en el §5c.
+> Sello vigente (S202):
+> sha256 del evaluador (fin de línea LF): `74d7648b70b1c13b70cbf9f39fa2ea1ec9abf2bca80b9686a3d24f493870b2fb`.
 > Sello S200c (#1132, fin de la ventana sellado en 2026-11-23), conservado:
 > `d17a68a2c0a12493a2efafbb839d3018ab4091a5570b52ef18937f024027acbc`.
 > Sello S200b (#1130), conservado: `0b403901dedbf566ac0e190cf12d0861b26c24224bc773b1a70e73d42d61dd89`.
@@ -287,9 +288,25 @@ sello S200c):
 - **Freno 2 (INVALIDO): las excluidas pasan del 1 % de las noches negativas.** Con `n` excluidas que entran a las cuentas
   y N noches negativas del `control`, INVALIDO si 100·n > N (en enteros).
 - **Publicación quitada.** Si una noche sigue en el denominador y deja de publicar en un brazo porque la escena
-  excluida era su única publicación, no invalida: es lo que la muestra común pretende (la publicación se apoyaba en una
-  escena que otro brazo no pudo medir) y se declara por brazo. Su efecto sobre la tasa de un brazo queda acotado por el
-  freno 2 (a lo más un punto porcentual).
+  excluida era su única publicación, no invalida por sí sola: es lo que la muestra común pretende (la publicación se
+  apoyaba en una escena que otro brazo no pudo medir) y se declara por brazo. Su efecto sobre la tasa de un brazo queda
+  acotado por el freno 2 (a lo más un punto porcentual).
+- **Freno 3 (INVALIDO): las publicaciones quitadas cambian la elección.** El verificador del re-sello (R202V-1, gravedad
+  2) mostró que, con los frenos 1 y 2 en verde, lo único que mueve la exclusión son publicaciones quitadas, así que la
+  tasa de un brazo sólo puede bajar y el piso elegido sólo puede quedar igual o bajar: un sesgo hacia bajar el umbral.
+  Nicolás decidió el 2026-11-26, a la pregunta «¿Cómo cierro el sesgo hacia pisos más bajos del re-sello antes de
+  mergear #1136?», «Agregar freno 3». `calibrar` elige también con las publicaciones quitadas devueltas a cada brazo
+  (`exclusion_comun.eleccion_con_publicaciones_devueltas`); si el estado o el piso difieren de la elección con la
+  exclusión, INVALIDO: la exclusión decidiría el piso. Consecuencia (verificador, R202V-5, gravedad 1): con los tres
+  frenos, la muestra común nunca mueve la elección; el resultado coincide con el que habría dado el sello S200c o sale
+  INVALIDO. Es lo conservador: un barrido que el S200c daba no monótono sigue INVALIDO aunque la muestra común lo
+  arreglara, y pasar de «SIN VALOR» a «SIN VALOR DE PISO» (ninguno elige piso) también sale INVALIDO.
+- **Cómo se lee «decide su noche» (freno 1).** Quitar las excluidas cambia si la noche entra al denominador de la tasa
+  por noche (`E.tasas_barrido`: alguna pasada negativa limpia y ninguna con alerta o falso positivo de MIROVA). Eso cubre
+  los casos en que la excluida mueve la cuenta. Dos casos que caen en la letra del paréntesis no la mueven y no se marcan
+  (R202V-2, gravedad 1): la excluida es la única alerta de la noche pero no hay otra pasada negativa limpia (la noche
+  no entra al denominador ni con ella ni sin ella), o es la única negativa limpia pero la noche ya tiene una alerta de
+  MIROVA en otro sensor (la noche tampoco estaba en el denominador).
 
 **Lo que se sabía del barrido al re-sellar.** Nadie ha corrido `calibrar` sobre el barrido ni calculado ninguna tasa
 por noche. Se conoce el conteo de escenas de validez distinta de marzo a agosto (21.005 records por brazo): una sola,
@@ -302,7 +319,7 @@ que lista sus 14 pasadas como RUTINA, no la de MIROVA) da ELEGIDO con el mismo p
 
 **Lo que no cambia:** los brazos, la grilla, s_A, la tasa objetivo, la unidad, el fin sellado, `elegir_piso` y la vara
 del S194. Orden de los controles: cobertura, código, identidad del `control`, fuga donde la zona no actúa, cuentas de
-producción, réplica por noche, freno 1, freno 2 y, al final, poder.
+producción, réplica por noche, freno 1, freno 2, freno 3 y, al final, poder.
 
 ## 6. La vara, sin cambios
 
