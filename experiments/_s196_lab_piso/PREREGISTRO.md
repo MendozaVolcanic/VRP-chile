@@ -16,9 +16,14 @@
 > ⚠️ **Re-sello S200 (2026-11-25), antes de mirar ningún resultado del barrido.** Nicolás decidió re-sellar
 > («Sí, re-sella», 2026-11-25) los cuatro defectos de gravedad 3 que la auditoría externa (Codex, ronda 4, frente D)
 > encontró y un verificador Claude de contexto limpio reprodujo; qué cambió y por qué, en el §5b. La vara (S194) no
-> cambia. Sello vigente (S200c, fin de la ventana sellado en 2026-11-23 por el acta de cierre de la ronda 4, aprobada
-> por Nicolás el 2026-11-25; §5b al final):
-> sha256 del evaluador (fin de línea LF): `d17a68a2c0a12493a2efafbb839d3018ab4091a5570b52ef18937f024027acbc`.
+> cambia.
+>
+> ⚠️ **Re-sello S202 (2026-11-26), antes de calcular ninguna tasa del barrido.** Nicolás aprobó el arreglo (a) de
+> R5C-101 (ronda 5 de Codex, cierre) con «Sí, re-séllalo así» (2026-11-26): muestra común entre brazos, con dos frenos
+> sellados; qué cambió y por qué, en el §5c. Sello vigente (S202):
+> sha256 del evaluador (fin de línea LF): `dfe898649efe0c7ab92842dfe12fa88bd1d17b06af0632e4d1c0ade0bc5de540`.
+> Sello S200c (#1132, fin de la ventana sellado en 2026-11-23), conservado:
+> `d17a68a2c0a12493a2efafbb839d3018ab4091a5570b52ef18937f024027acbc`.
 > Sello S200b (#1130), conservado: `0b403901dedbf566ac0e190cf12d0861b26c24224bc773b1a70e73d42d61dd89`.
 > Sello del re-sello S200 (#1129), conservado: `5493f1a714f709c381bae7722c7cbb09c816288f38857b720f77443d287a8286`.
 > Sello anterior (S196), conservado: el evaluador tenía
@@ -241,6 +246,63 @@ el fin en **2026-11-23**, el último día de la última tanda despachada del bar
 otro fin `calibrar` sale INVALIDO sin cargar ni contar nada, y la línea de comandos usa el sellado por defecto. La
 salida guarda además el sha256 de cada archivo leído de cada brazo, para que la muestra evaluada quede identificada.
 El inicio de la ventana (2026-03-01) no cambia.
+
+## 5c. Re-sello S202 (2026-11-26): la muestra común entre brazos (R5C-101)
+
+**El fenómeno.** De noche, en la zona A, el umbral es max(mu + s·sd, piso). Un foco débil pegado al borde de una región
+sin dato (nube fría, escaneo vacío) puede quedar sobre el piso bajo y bajo el de hoy. Con el piso bajo el detector lo
+alerta, pero el fondo se estima quitando un halo alrededor de los alertados e interpolando con las celdas que quedan, y
+la interpolación no extrapola fuera de las celdas con dato: el alertado queda sin fondo. En MODIS, si todos los alertados
+quedan así, la vía guarda la escena como «no medida» (`diag_codigo_mirova.motivo_vacio = fondo_no_estimado`). Con el
+piso de hoy la misma escena era un cero válido. En VIIRS 375 pasa al revés (R5C-V201): una escena sin contraste en el
+7 × 7 del cráter y sin alertas es «crater_no_evaluado» con el piso de hoy, y con el piso bajo un foco de la zona A fuera
+de ese 7 × 7 la vuelve válida y publicada. La validez de una escena depende del brazo.
+
+**El defecto.** `E.tasas_barrido` saca las escenas inválidas brazo por brazo (`banco_paridad.es_escena_invalida`, la
+misma regla del banco y del tablero), así que los brazos se comparaban sobre muestras distintas, y ningún control lo
+veía: la cobertura compara claves, no validez; la identidad record a record es sólo del `control` contra `sin_zona`. El
+cierre de la ronda 5 de Codex lo mostró con escenas sintéticas de noches de una sola pasada (la elección cambiaba de
+0,00225 a 0,0025 con todo en verde). El verificador Claude de contexto limpio lo dejó en gravedad 2
+(`D:\codex-vrp\_salida\ronda5\cierre_verificacion\VEREDICTO.md`, fuera del repo).
+
+**La decisión, literal.** A la pregunta «¿Re-sello el evaluador excluyendo de todos los brazos la escena inválida, con
+frenos?», Nicolás respondió «Sí, re-séllalo así» (2026-11-26, S201): arreglo (a) del verificador.
+
+**Qué cambia** (todo en `calibrar`; pruebas en `tests/test_lab_piso_resello_s202.py`, que fallan con el evaluador del
+sello S200c):
+
+- **Muestra común.** Antes de contar, toda escena (volcán, sensor, hora) inválida en alguno de los nueve brazos
+  (`sin_zona`, `control` y los siete pisos) y válida en otro sale de los brazos contados **y de producción** (si sale
+  sólo de los brazos, `control_tasas` da INVALIDO por construcción, R5C-V203). Las inválidas en los nueve ya salían de
+  todos. Las cuentas las sigue haciendo `E.tasas_barrido`, sin cambios, sobre copias de las carpetas sin esas escenas.
+- **Se declara.** La salida trae `exclusion_comun`: cada escena excluida con su motivo en cada brazo, cuántas entran a
+  las cuentas (`n`: volcán de la zona A, dentro de la ventana, no descartada de día) y cuántas hay en total, cuántos
+  records se quitaron por brazo y volcán, las noches decisivas y las publicaciones quitadas.
+- **Freno 1 (INVALIDO): una excluida decide su noche.** Si en algún brazo contado o en producción quitar las excluidas
+  cambia si una noche entra al denominador (la excluida era su única pasada negativa limpia, o su única pasada con alerta
+  o falso positivo de MIROVA), INVALIDO: la exclusión cambiaría qué noches se comparan. Para verlo, `noches_por_brazo`
+  replica el conteo por noche de `E.tasas_barrido` (mismo cargador, etiquetador y referencia ya bajada) y `calibrar`
+  exige que esa réplica, sin las excluidas, dé exactamente las cuentas NOCHE de `E.tasas_barrido` en cada brazo y en
+  producción; si no, INVALIDO (los frenos no estarían mirando lo que se cuenta).
+- **Freno 2 (INVALIDO): las excluidas pasan del 1 % de las noches negativas.** Con `n` excluidas que entran a las cuentas
+  y N noches negativas del `control`, INVALIDO si 100·n > N (en enteros).
+- **Publicación quitada.** Si una noche sigue en el denominador y deja de publicar en un brazo porque la escena
+  excluida era su única publicación, no invalida: es lo que la muestra común pretende (la publicación se apoyaba en una
+  escena que otro brazo no pudo medir) y se declara por brazo. Su efecto sobre la tasa de un brazo queda acotado por el
+  freno 2 (a lo más un punto porcentual).
+
+**Lo que se sabía del barrido al re-sellar.** Nadie ha corrido `calibrar` sobre el barrido ni calculado ninguna tasa
+por noche. Se conoce el conteo de escenas de validez distinta de marzo a agosto (21.005 records por brazo): una sola,
+Llaima MODIS Terra 2026-05-30 02:55, «fondo_no_estimado» en seis pisos (S201,
+`D:\vrp-trabajo\temporales\s201\r5c101\medir_invalidas_salida.txt`). Al armar la prueba con sus records reales se vio
+que en 0,00275 esa escena es válida con 9,685 MW (en el `control`, 0 MW): la exclusión le quita a ese brazo esa
+publicación. El verificador había contado que su noche tiene otras pasadas negativas limpias; con la exclusión la noche
+no cambia de denominador en ningún brazo. La prueba con los 14 records reales de esa noche (y una referencia sintética
+que lista sus 14 pasadas como RUTINA, no la de MIROVA) da ELEGIDO con el mismo piso del barrido sintético sano. Septiembre a noviembre: SIN DATO hasta que terminen sus tandas.
+
+**Lo que no cambia:** los brazos, la grilla, s_A, la tasa objetivo, la unidad, el fin sellado, `elegir_piso` y la vara
+del S194. Orden de los controles: cobertura, código, identidad del `control`, fuga donde la zona no actúa, cuentas de
+producción, réplica por noche, freno 1, freno 2 y, al final, poder.
 
 ## 6. La vara, sin cambios
 

@@ -34,7 +34,7 @@ import argparse
 import importlib.util
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -288,6 +288,137 @@ def _sha256(ruta):
     return hashlib.sha256(Path(ruta).read_bytes()).hexdigest()
 
 
+# ------------------------------------------------------------------------------------------------ re-sello S202
+# Decisión de Nicolás del 2026-11-26 («Sí, re-séllalo así»), antes de calcular ninguna tasa del barrido: arreglo (a) de
+# R5C-101 (cierre de la ronda 5 de la auditoría externa con Codex; verificador Claude de contexto limpio,
+# D:/codex-vrp/_salida/ronda5/cierre_verificacion/VEREDICTO.md). Pruebas: tests/test_lab_piso_resello_s202.py.
+# POR QUÉ. De noche, con el piso bajo, un foco débil pegado a un hueco de datos puede quedar alertado sin vecinos para
+# estimar su fondo: la vía guarda la escena MODIS como no medida (`motivo_vacio = fondo_no_estimado`) sólo en ese
+# brazo. Y al revés en VIIRS 375 (R5C-V201): una escena que el control no midió (`crater_no_evaluado`) se vuelve
+# válida y publica con el piso bajo. Como cada brazo sacaba sus inválidas por separado, los brazos se comparaban
+# sobre muestras distintas y ningún control lo veía. Arreglo: la muestra es común; toda escena inválida en alguno de
+# los nueve brazos sale de los nueve y de producción (si sale sólo de los brazos, `control_tasas` da INVÁLIDO por
+# construcción: R5C-V203), y la salida la declara. Dos frenos sellados acotan lo que la exclusión puede mover.
+TOPE_EXCLUIDAS = 0.01          # freno 2: las excluidas no pueden pasar del 1 % de las noches negativas del control
+
+
+def supera_tope(n_excluidas, n_noches_neg):
+    """Freno 2, en enteros: n_excluidas > 1 % de n_noches_neg  <=>  100 n_excluidas > n_noches_neg."""
+    return round(1 / TOPE_EXCLUIDAS) * n_excluidas > n_noches_neg
+
+
+def _clave_canonica(vol, sensor, t):
+    """(volcán, sensor, hora) con la hora en el formato del almacén: la misma clave sale del record crudo y de la pasada
+    que carga el banco (que la reescribe desde un datetime)."""
+    try:
+        t = datetime.strptime(t, "%Y-%m-%d %H:%M").strftime("%Y-%m-%d %H:%M")
+    except (TypeError, ValueError):
+        pass
+    return (vol, sensor, t)
+
+
+def escenas_validez_distinta(recs_por_brazo):
+    """{clave: {brazo: motivo_vacio o None}} de las escenas inválidas en algún brazo y válidas en otro (la misma regla
+    de inválida que el banco: `banco_paridad.es_escena_invalida`, motivo_vacio no vacío). Las inválidas en todos los
+    brazos ya salen de todos por la regla de siempre: no se cuentan como exclusión nueva."""
+    por = {}
+    for k, recs in recs_por_brazo.items():
+        for r in recs:
+            m = (r.get("diag_codigo_mirova") or {}).get("motivo_vacio") or None
+            por.setdefault(_clave_canonica(r["_vol"], r.get("sensor"), r.get("datetime_utc")), {})[k] = m
+    return {c: d for c, d in por.items() if any(v is not None for v in d.values()) and any(v is None for v in d.values())}
+
+
+def _contable(clave, fin, coords):
+    """La escena entra a las cuentas de E.tasas_barrido: volcán de la zona A, sensor con cubo, dentro de la ventana y
+    no descartada de día por el banco."""
+    import banco_paridad as bp
+    vol, sensor, t = clave
+    b = bp.bucket(sensor)
+    if vol not in E.VOLCANES_ZONA_A or b is None or not _en_ventana({"datetime_utc": t}, fin):
+        return False
+    try:
+        dt = datetime.strptime(t, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return False
+    return not bp.es_pasada_diurna_descartada(b, *coords[vol], dt)
+
+
+def excluir_de_carpeta(origen, destino, claves):
+    """Copia los JSON de `origen` a `destino` sin los records cuya clave está en `claves`. Devuelve {volcán: quitados}."""
+    destino = Path(destino)
+    destino.mkdir(parents=True, exist_ok=True)
+    quitados = {}
+    for ruta in sorted(Path(origen).glob("*.json")):
+        vol = ruta.stem
+        d = json.loads(ruta.read_text(encoding="utf-8"))
+        recs = d["records"] if isinstance(d, dict) else d
+        quedan = [r for r in recs if _clave_canonica(vol, r.get("sensor"), r.get("datetime_utc")) not in claves]
+        quitados[vol] = len(recs) - len(quedan)
+        salida = dict(d, records=quedan) if isinstance(d, dict) else {"records": quedan}
+        (destino / ruta.name).write_text(json.dumps(salida, ensure_ascii=False), encoding="utf-8")
+    return quitados
+
+
+def noches_por_brazo(brazos, fin, dest):
+    """{brazo: {(volcán, noche): [(clave, etiqueta, publica)]}}: las pasadas que cuenta E.tasas_barrido (mismo cargador
+    con las inválidas del brazo fuera, mismo etiquetador, misma referencia ya bajada a `dest`), agrupadas por noche de
+    volcán. Es una réplica del conteo por noche para ver qué noches toca la exclusión; `calibrar` exige que, quitadas
+    las excluidas, dé exactamente las cuentas NOCHE de E.tasas_barrido (si no, INVÁLIDO)."""
+    import banco_paridad as bp
+    coords, inner = bp._coords_por_volcan(), bp.inner_desde_html()
+    ventana = (E.VENTANA_CALIBRACION_INICIO, fin)
+    filas = bp.cargar_referencia_unificada(Path(dest) / CSV_REFERENCIA[0], Path(dest) / CSV_REFERENCIA[1])
+    por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, ventana, regla_minimas=bp.MODO_MINIMAS)
+    out = {}
+    for k, d in brazos.items():
+        recs = [r for r in bp.cargar_nuestros(coords, inner, ventana, data=d, excluir_escenas_invalidas=True)
+                if r["vol"] in E.VOLCANES_ZONA_A]
+        bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
+        noches = {}
+        for r in recs:
+            c = _clave_canonica(r["vol"], r["sensor"], r["dt"].strftime("%Y-%m-%d %H:%M"))
+            noches.setdefault((r["vol"], r["noche"]), []).append((c, r["lab"], bool(r["pub"])))
+        out[k] = noches
+    return out
+
+
+def _estado_noche(pasadas):
+    """(entra al denominador, publica) con la regla de E.tasas_barrido: alguna `neg_limpio` y ninguna `pos` ni
+    `far_ref`; publica si alguna pasada de la noche publica."""
+    labs = [l for _, l, _ in pasadas]
+    neg = "neg_limpio" in labs and not any(l in ("pos", "far_ref") for l in labs)
+    return neg, any(p for _, _, p in pasadas)
+
+
+def frenos_exclusion(noches, excluidas):
+    """Freno 1 y lo que la exclusión mueve. Para cada brazo y cada noche con una escena excluida: «decide su noche» si
+    quitarla cambia si la noche entra al denominador (era la única negativa limpia, o la única pasada con alerta o
+    falso positivo de MIROVA). Si la noche sigue en el denominador y deja de publicar, es una publicación quitada:
+    lo que la muestra común quiere (una publicación sobre una escena que otro brazo no pudo medir), y se declara.
+    Devuelve (decisivas, publicaciones_quitadas, cuentas NOCHE de la réplica sin las excluidas)."""
+    decisivas, quitadas, cuentas = [], {}, {}
+    for k, por_noche in noches.items():
+        n_pub = n_neg = 0
+        for (vol, noche), pasadas in por_noche.items():
+            sin = [p for p in pasadas if p[0] not in excluidas]
+            neg_sin, pub_sin = _estado_noche(sin)
+            if neg_sin:
+                n_neg += 1
+                n_pub += pub_sin
+            if len(sin) == len(pasadas):
+                continue
+            neg_con, pub_con = _estado_noche(pasadas)
+            if neg_con != neg_sin:
+                decisivas.append({"brazo": str(k), "volcan": vol, "noche": noche,
+                                  "efecto": "sale del denominador" if neg_con else "entra al denominador",
+                                  "excluidas": [list(p[0]) for p in pasadas if p[0] in excluidas]})
+            elif neg_sin and pub_con and not pub_sin:
+                quitadas[str(k)] = quitadas.get(str(k), 0) + 1
+        cuentas[k] = (n_pub, n_neg)
+    return decisivas, quitadas, cuentas
+
+
 def calibrar(sin_zona, control, brazos, prod, fin, dest):
     """Corre la calibración completa. `brazos`: {piso: carpeta}. Orden de los controles: primero los que invalidan
     (cobertura, código, identidad, fuga fuera de la zona, cuentas de producción), después el de poder. Antes de todo,
@@ -313,10 +444,36 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
     # R4FD-V201 y R4FD-106: producción contada con las reglas de día del laboratorio, y una sola bajada de la
     # referencia de MIROVA para todos los brazos y producción, con el sha256 de lo que se bajó.
     prod_lab, quitados = prod_como_laboratorio(prod, Path(dest) / "produccion_como_laboratorio")
-    todas = E.tasas_barrido({CONTROL: control, **brazos, "prod": prod_lab}, fin, dest)
+    # Re-sello S202 (R5C-101): la muestra común. Las escenas de validez distinta entre los nueve brazos salen de los
+    # brazos contados y de producción antes de contar; las cuentas las hace E.tasas_barrido sobre esas copias.
+    excluidas = escenas_validez_distinta(recs)
+    originales = {CONTROL: control, **brazos, "prod": prod_lab}
+    if excluidas:
+        comun = Path(dest) / "muestra_comun"
+        a_contar = {k: str(comun / str(k).replace(".", "_")) for k in originales}
+        records_quitados = {str(k): excluir_de_carpeta(originales[k], a_contar[k], excluidas) for k in originales}
+    else:
+        a_contar, records_quitados = dict(originales), {}
+    todas = E.tasas_barrido(a_contar, fin, dest)
     tasas_prod = todas.pop("prod")
     tasas = todas
     referencia = {n: _sha256(Path(dest) / n) for n in CSV_REFERENCIA if (Path(dest) / n).exists()}
+    import banco_paridad as bp
+    coords = bp._coords_por_volcan()
+    contables = sorted((c for c in excluidas if _contable(c, fin, coords)), key=lambda x: tuple(map(str, x)))
+    decisivas, pub_quitadas, replica_igual = [], {}, True
+    if contables:
+        decisivas, pub_quitadas, cuentas = frenos_exclusion(noches_por_brazo(originales, fin, dest), set(excluidas))
+        oficiales = dict(tasas, prod=tasas_prod)
+        replica_igual = all(cuentas.get(k) == tuple(oficiales[k]["NOCHE"]) for k in originales)
+    n_neg_control = (tasas.get(CONTROL) or {}).get("NOCHE", (0, 0))[1]
+    exclusion = {"n": len(contables), "n_total": len(excluidas), "tope": TOPE_EXCLUIDAS,
+                 "noches_negativas_control": n_neg_control, "decisivas": decisivas,
+                 "publicaciones_quitadas": pub_quitadas, "replica_por_noche_igual": replica_igual,
+                 "records_quitados": records_quitados,
+                 "escenas": [{"clave": list(c), "contable": c in contables,
+                              "motivos": {str(k): v for k, v in excluidas[c].items()}}
+                             for c in sorted(excluidas, key=lambda x: tuple(map(str, x)))]}
     res = elegir_piso(tasas)
     if not cob["igual"]:
         res = {"estado": INVALIDO, "valor": None,
@@ -336,6 +493,19 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
         res = {"estado": INVALIDO, "valor": None,
                "detalle": "el brazo de producción no reproduce las cuentas de producción: %s contra %s"
                           % (tasas.get(CONTROL), tasas_prod)}
+    elif not replica_igual:
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "la réplica por noche de los frenos de la exclusión no da las cuentas NOCHE de "
+                          "E.tasas_barrido: los frenos no miran lo que se cuenta (re-sello S202)"}
+    elif decisivas:
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "%d noches en que una escena excluida por validez distinta entre brazos decide su noche "
+                          "(era su única negativa limpia o su única alerta o falso positivo de MIROVA): freno 1 del "
+                          "re-sello S202 (R5C-101)" % len(decisivas)}
+    elif supera_tope(len(contables), n_neg_control):
+        res = {"estado": INVALIDO, "valor": None,
+               "detalle": "%d escenas excluidas por validez distinta entre brazos pasan del 1 %% de las %d noches "
+                          "negativas del control: freno 2 del re-sello S202 (R5C-101)" % (len(contables), n_neg_control)}
     # Re-sello S200b (verificador de #1129): el poder cuenta sólo los records de la ventana de calibración donde la zona
     # no actúa (la identidad sigue mirando todos), y SIN PODER no tapa un INVALIDO que ya dio elegir_piso (por ejemplo,
     # tasa no monótona: un instrumento roto se informa como roto).
@@ -348,7 +518,7 @@ def calibrar(sin_zona, control, brazos, prod, fin, dest):
                 "tasas": {str(k): v for k, v in tasas.items()}, "s_a": S_A, "grilla_piso": list(GRILLA_PISO),
                 "cobertura_brazos": cob, "codigo_brazos": cod, "referencia_mirova": referencia,
                 "produccion_como_laboratorio": {"carpeta": prod_lab, "quitados": quitados}, "fin": fin,
-                "muestra": muestra})
+                "muestra": muestra, "exclusion_comun": exclusion})
     return res
 
 
