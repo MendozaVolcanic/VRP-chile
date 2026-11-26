@@ -1,8 +1,9 @@
 # Acta de cierre de la auditoría externa con Codex, ronda 5
 
-**Propuesta, pendiente de la aprobación de Nicolás Mendoza.** Escrita por la sesión S202 (2026-11-26) a partir del
-cierre informado de Codex, su verificador Claude de contexto limpio y las dos decisiones de Nicolás del 2026-11-26. Las
-decisiones de la tabla «Acta» son propuestas hasta que Nicolás apruebe esta acta.
+Aprobada por Nicolás Mendoza el 2026-11-26 a las ~14:55 UTC («Sí, apruebo»). Escrita por la sesión S202 a partir del
+cierre informado de Codex, su verificador Claude de contexto limpio y las decisiones de Nicolás del 2026-11-26; las
+decisiones de la tabla «Acta», que eran propuestas, quedan aprobadas con ella. El re-sello que cerraba R5C-101 entró en
+main con #1136 (ficha v1.113).
 
 ## Por qué existe este documento
 
