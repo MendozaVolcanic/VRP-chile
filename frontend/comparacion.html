@@ -121,8 +121,9 @@
 <section class="pane" id="pane-dist">
   <div class="explain"><b>¿Detectamos en el mismo lugar que MIROVA?</b> Distribución de distancia al cráter
   (GVP) de nuestras detecciones (cluster summit, VRP&gt;0, <b>re-ancladas al GVP</b>) vs la
-  <code>Distancia_km</code> que reporta MIROVA (ALERTA_TÉRMICA). Si las dos distribuciones se solapan,
-  estamos espacialmente alineados. Caso PCC: ambas deberían caer en ~7-8 km (el lacolito Cordón Caulle).</div>
+  <code>Distancia_km</code> que reporta MIROVA (ALERTA_TÉRMICA). Que las dos distribuciones se solapen dice que los
+  focos están a distancias parecidas del cráter, no que estén en el mismo lugar: un foco al norte y otro al sur a la misma
+  distancia dan la misma barra, y la distancia nuestra y la de MIROVA se miden desde puntos de referencia distintos. Caso PCC: ambas deberían caer en ~7-8 km (el lacolito Cordón Caulle).</div>
   <div class="controls">
     <label>Volcán:</label>
     <select id="dist-volc"></select>
@@ -298,8 +299,9 @@ function histo(values, max) {
     for (let i = 0; i < BINS.length-1; i++) { if (v >= BINS[i] && v < BINS[i+1]) { h[i]++; placed=true; break; } }
     if (!placed && v >= BINS[BINS.length-1]) h[BINS.length-1]++;
   }
-  const n = h.reduce((a,b)=>a+b,0) || 1;
-  return { counts: h, pct: h.map(x => 100*x/n), n };
+  const n = h.reduce((a,b)=>a+b,0);  // S201 (R5FE-106): el tamaño real; antes «|| 1» rotulaba n=1 un histograma vacío
+  const div = n || 1;
+  return { counts: h, pct: h.map(x => 100*x/div), n };
 }
 function median(arr) {
   const a = arr.filter(x => x != null && !isNaN(x)).sort((x,y)=>x-y);
@@ -329,7 +331,7 @@ async function renderDist(name) {
   });
   el("dist-stat").innerHTML = `<b>${volc.display}</b> · mediana nuestra (GVP) <b>${median(ourDist)?.toFixed(2) ?? "—"} km</b> · `
     + `mediana MIROVA <b>${median(mirDist)?.toFixed(2) ?? "—"} km</b>. `
-    + `Si las barras se solapan, estamos alineados espacialmente con MIROVA.`;
+    + `Si las barras se solapan, los focos están a distancias parecidas del cráter; eso no prueba que estén en el mismo lugar.`;
 }
 
 // ============================ TAB 2: SCATTER 1:1 ============================
