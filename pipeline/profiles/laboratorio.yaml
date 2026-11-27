@@ -6,15 +6,18 @@
 #                 operacional ni la alerta.
 # Lógica        : La vía «código MIROVA» de producción en los tres sensores (hereda mirova_equivalent), más UNA
 #                 extensión declarada, MEJ-5: un umbral contextual más permisivo sólo dentro de la zona A (el círculo
-#                 de inner_radius_km alrededor del cráter), igual a producción fuera. En este paso la zona A está
-#                 APAGADA: el record de cada pasada es el de producción, en otra carpeta.
+#                 de inner_radius_km alrededor del cráter), igual a producción fuera. S203 (paso 4): la zona A está
+#                 ENCENDIDA con s = 3 y piso 0,0025, el valor que eligió la calibración pre-registrada (ELEGIDO,
+#                 experiments/_s196_lab_piso/RESULTADO_CALIBRAR_S203.md); es el brazo _s196_lab_p250 del barrido.
 # Modelo/método : Reglas físicas deterministas (port del .m de MIROVA), sin ML (punto 5.5 Res.372).
 # Datos entrada : Los de producción: radiancias MIR y TIR de MODIS y VIIRS (L1B) y su geolocalización. SIN datos
 #                 personales.
 # Variables     : Las de producción. La extensión agrega un parámetro, el multiplicador de sigma de la zona A en el
-#                 criterio contextual nocturno (laboratorio_zona_a.valor), hoy null; lo elige el paso 3 del plan.
-# Limitaciones  : Mientras la zona A esté apagada no mide nada nuevo (es un gemelo de producción). Cuando se encienda,
-#                 cada píxel extra que mire puede ser un valle tibio, un salar o un incendio: por eso sólo cuenta lo
+#                 criterio contextual nocturno (laboratorio_zona_a.valor = 3,0), y su piso de NTI y ETI
+#                 (laboratorio_zona_a.piso = 0,0025; producción usa 5 y 0,003).
+# Limitaciones  : Con la zona encendida, en las noches en que MIROVA no vio nada publica algo en el 24,8 % (381 de
+#                 1.538 noches negativas limpias, marzo al 23-nov; producción 8,3 %; tope sellado 30 %). Cada píxel
+#                 extra que mire puede ser un valle tibio, un salar o un incendio: por eso sólo cuenta lo
 #                 que confirme NHI o la persistencia, con el nulo medido (S131: 20 a 49 % de tasa basal NHI).
 #                 Cordón Caulle queda fuera de la primera tanda (inner de 20 km, casi dos tercios de la escena; D6).
 # Refs/datos    : docs/PLAN_EXPERIMENTAL_S190.md (§2, §4, §6, §7 y decisiones D1 a D7 de Nicolás, 2026-11-17);
@@ -41,13 +44,15 @@ extends: mirova_equivalent
 profile: laboratorio
 description: >
   Laboratorio sobre la vía de producción (S193, paso 1 del plan S190): producción tal cual en carpeta propia, con la
-  extensión MEJ-5 (zona A más sensible) declarada y apagada.
+  extensión MEJ-5 (zona A más sensible) encendida con s = 3 y piso 0,0025 (S203, paso 4).
 
 thresholds:
-  # POR QUÉ apagada y no ausente: la zona A existe para que el paso 3 elija su umbral sobre negativos limpios. Encenderla
-  # antes de que la vía la implemente es un error al cargar el perfil (pipeline/profile.py, _zona_a_de), para que nadie
-  # corra un laboratorio idéntico a producción creyendo que mide la extensión.
-  enable_lab_zona_a: false
+  # S203 (paso 4 del plan S190; decisión de Nicolás del 2026-11-27, «sigue con lo que recomiendes», tras ver el
+  # ELEGIDO de la calibración): encendida. Texto anterior: «apagada y no ausente: la zona A existe para que el paso 3
+  # elija su umbral sobre negativos limpios. Encenderla antes de que la vía la implemente es un error al cargar el
+  # perfil (pipeline/profile.py, _zona_a_de), para que nadie corra un laboratorio idéntico a producción creyendo que
+  # mide la extensión».
+  enable_lab_zona_a: true
 
 paths:
   # S193: producción abre el día de MODIS (A/B #813, decisión de Nicolás del 2026-11-21); este perfil
@@ -63,12 +68,16 @@ enable_modis_b22_primary: true
 # multiplicador de sigma del criterio contextual nocturno de la vía (detectar_mirova: alerta si el contraste NTI y el
 # ETI superan max(mu + s·sd, piso); hoy la región sensible del cráter usa s = 5 y la conservadora s = 10). En la zona A
 # se usaría s = valor, con los pisos de la región sensible; menor valor, más alertas (lo vigila
-# tests/test_guard_laboratorio_no_mas_ciego_s147.py: valor <= s2 nocturno). valor: null hasta el paso 3.
+# tests/test_guard_laboratorio_no_mas_ciego_s147.py: valor <= s2 nocturno). S203: valor 3,0 y piso 0,0025, los del
+# brazo _s196_lab_p250, elegidos por evaluar.py calibrar sobre el barrido completo (ELEGIDO, tres frenos en verde;
+# experiments/_s196_lab_piso/RESULTADO_CALIBRAR_S203.md). s = 3 lo fijó el pre-registro (respuesta 1 de Nicolás del
+# 2026-11-23); el piso, la regla sellada: el menor de la grilla con tasa por noche negativa limpia de a lo más 30 %.
 laboratorio_zona_a:
   extension: MEJ-5
   radio: inner_radius_km
   parametro: sigma_contextual_nocturno
-  valor: null
+  valor: 3.0
+  piso: 0.0025
   volcanes_fuera:
     - PuyehueCordonCaulle   # D6: inner de 20 km
 

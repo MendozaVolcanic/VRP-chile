@@ -43,7 +43,11 @@ COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(get
 # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y el laboratorio,
 # que no se midió de día, lo declara apagado (pipeline/profiles/laboratorio.yaml, `paths`). Texto original: sin
 # ENABLE_DAYTIME_MODIS.
-DIFERENCIAS_DECLARADAS = {"PROFILE_NAME", "DATA_SUBDIR", "LAB_ZONA_A", "ENABLE_DAYTIME_MODIS"}
+# ⚠️ S203 (A113; paso 4, decisión de Nicolás del 2026-11-27): la zona A se encendió con s 3 y piso 0,0025, así que
+# ENABLE_LAB_ZONA_A también difiere. Texto anterior: sin ENABLE_LAB_ZONA_A («declarada y apagada»).
+DIFERENCIAS_DECLARADAS = {"PROFILE_NAME", "DATA_SUBDIR", "LAB_ZONA_A", "ENABLE_DAYTIME_MODIS", "ENABLE_LAB_ZONA_A"}
+LAB_APAGADO = "_s196_lab_sinzona"   # S203: el laboratorio anterior (zona apagada), en otra carpeta
+LAB_ELEGIDO = "_s196_lab_p250"      # S203: el brazo que eligió la calibración; el laboratorio tiene que ser éste
 CLAVES_ZONA = re.compile(r"\b(?:enable_lab_zona_a|laboratorio_zona_a)\b")
 LECTURA_ZONA = re.compile(r"\b(?:ENABLE_LAB_ZONA_A|LAB_ZONA_A)\b")
 
@@ -77,19 +81,21 @@ def test_g1_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado(resueltos)
     assert (lab["ENABLE_DAYTIME_MODIS"], prod["ENABLE_DAYTIME_MODIS"]) == ("False", "True")
 
 
-def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_apagada(resueltos):
+def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_con_el_valor_elegido(resueltos):
     """D2 (a): la base es la vía de producción. Si producción la apagara, G1 seguiría verde (el laboratorio la sigue);
     esto dice que hoy el laboratorio mide sobre la vía, que es lo que el plan S190 aprobó."""
     lab = resueltos["laboratorio"]
     for flag in ("ENABLE_MODIS_CODIGO_MIROVA", "ENABLE_V375_CODIGO_MIROVA", "ENABLE_V750_CODIGO_MIROVA"):
         assert lab.get(flag) == "True", (flag, lab.get(flag))
-    assert lab.get("ENABLE_LAB_ZONA_A") == "False", lab.get("ENABLE_LAB_ZONA_A")
+    assert lab.get("ENABLE_LAB_ZONA_A") == "True", lab.get("ENABLE_LAB_ZONA_A")   # S203: antes "False"
     zona = ast.literal_eval(lab["LAB_ZONA_A"])
     assert zona.get("extension") == "MEJ-5" and zona.get("radio") == "inner_radius_km", zona
     # S195 (paso 3): la zona ya tiene efecto en la vía, pero el laboratorio sigue apagado y sin valor: el valor sale del
     # barrido de 9 brazos (perfiles _s195_lab_*, evaluar.py calibrar) y lo fija el paso 4. Texto anterior del mensaje:
     # «el umbral de la zona A se elige en el paso 3 del plan S190, no antes».
-    assert zona.get("valor") is None, f"el valor de la zona A del laboratorio lo fija el paso 4, tras el barrido: {zona}"
+    # S203 (paso 4): el valor y el piso son los que eligió evaluar.py calibrar (ELEGIDO, tres frenos en verde,
+    # experiments/_s196_lab_piso/RESULTADO_CALIBRAR_S203.md). Antes: valor None hasta el paso 4.
+    assert (zona.get("valor"), zona.get("piso")) == (3.0, 0.0025), zona
     assert "PuyehueCordonCaulle" in zona.get("volcanes_fuera", []), f"D6: Cordón Caulle fuera de la primera tanda: {zona}"
 
 
@@ -97,7 +103,7 @@ def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_apagada(resuelt
 @pytest.fixture(scope="module")
 def records():
     return {p: _arroba(_correr([str(RAIZ / "tests" / "_pasada_sintetica_laboratorio.py")], p), f"la pasada ({p})")
-            for p in ("laboratorio", "mirova_equivalent")}
+            for p in ("laboratorio", "mirova_equivalent", LAB_APAGADO, LAB_ELEGIDO)}
 
 
 @pytest.mark.parametrize("familia", ("MODIS", "VIIRS750", "VIIRS375"))
@@ -111,9 +117,16 @@ def test_g2_control_la_pasada_sintetica_detecta_con_la_via(records, familia):
 
 @pytest.mark.parametrize("familia", ("MODIS", "VIIRS750", "VIIRS375"))
 def test_g2_con_la_zona_apagada_el_record_es_el_de_produccion(records, familia):
+    # S203: la zona apagada es hoy LAB_APAGADO (el laboratorio anterior); el laboratorio se encendió.
     """Igualdad exacta del JSON: mismo proceso, mismos datos, misma CPU. El almacén agrega después la procedencia
     con el nombre del perfil (pipeline/store.py), que es identidad declarada (G1), no resultado."""
-    assert records["laboratorio"][familia] == records["mirova_equivalent"][familia]
+    assert records[LAB_APAGADO][familia] == records["mirova_equivalent"][familia]
+
+
+@pytest.mark.parametrize("familia", ("MODIS", "VIIRS750", "VIIRS375"))
+def test_g2_el_laboratorio_da_el_record_del_brazo_elegido(records, familia):
+    """S203: lo que el laboratorio corre es lo que se calibró: mismo record que el brazo p250 en la misma pasada."""
+    assert records["laboratorio"][familia] == records[LAB_ELEGIDO][familia]
 
 
 # ------------------------------------------------------------------------------------------------ G3
