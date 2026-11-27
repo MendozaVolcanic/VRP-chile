@@ -67,7 +67,8 @@ enable_modis_b22_primary: true
 # Extensión MEJ-5 (plan S190 §6). Zona A: celdas a no más de inner_radius_km del cráter (volcanoes.yaml). Parámetro: el
 # multiplicador de sigma del criterio contextual nocturno de la vía (detectar_mirova: alerta si el contraste NTI y el
 # ETI superan max(mu + s·sd, piso); hoy la región sensible del cráter usa s = 5 y la conservadora s = 10). En la zona A
-# se usaría s = valor, con los pisos de la región sensible; menor valor, más alertas (lo vigila
+# se usaría s = valor, con los pisos de la región sensible (⚠️ S203: desde el paso 4 el piso es el de `piso`, 0,0025,
+# no el 0,003 de la región sensible); menor valor, más alertas (lo vigila
 # tests/test_guard_laboratorio_no_mas_ciego_s147.py: valor <= s2 nocturno). S203: valor 3,0 y piso 0,0025, los del
 # brazo _s196_lab_p250, elegidos por evaluar.py calibrar sobre el barrido completo (ELEGIDO, tres frenos en verde;
 # experiments/_s196_lab_piso/RESULTADO_CALIBRAR_S203.md). s = 3 lo fijó el pre-registro (respuesta 1 de Nicolás del

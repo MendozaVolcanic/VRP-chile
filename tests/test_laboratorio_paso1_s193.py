@@ -9,7 +9,9 @@ exactamente la vía de producción, en otra carpeta.
 
 QUÉ VIGILA (G1 a G7 del plan docs/superpowers/plans/2026-11-21-laboratorio-paso1.md; G8 vive en el guard S147):
   G1 difiere de producción sólo en lo declarado (resuelto como lo resuelve el código, VRP_PROFILE, nunca el YAML: A89);
-  G2 con la zona apagada, el record de una misma pasada es el de producción en los tres sensores;
+  G2 con la zona apagada, el record de una misma pasada es el de producción en los tres sensores (⚠️ S203, A113: el
+     laboratorio se encendió en el paso 4; la zona apagada la representa hoy _s196_lab_sinzona, y el laboratorio da el
+     record del brazo elegido _s196_lab_p250);
   G3 no escribe en data/mirova_equivalent;
   G4 producción no cambia: resuelve la zona apagada y vacía, ningún otro perfil la declara y nadie en pipeline/ la lee
      (S195: salvo la vía, en s_zona_a, y los perfiles del barrido);
@@ -39,7 +41,8 @@ PERFILES = RAIZ / "pipeline" / "profiles"
 COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(getattr(p, k)) for k in dir(p) "
        "if k.isupper() and k != 'VALID_PROFILES'}))")
 # G1: lo único que el laboratorio declara distinto. PROFILE_NAME y DATA_SUBDIR son su identidad; LAB_ZONA_A es la
-# extensión MEJ-5 (zona A) declarada y apagada. Una segunda diferencia sin declarar pone esto en rojo.
+# extensión MEJ-5 (zona A) declarada (⚠️ S203: encendida desde el paso 4; texto anterior «declarada y apagada»). Una
+# segunda diferencia sin declarar pone esto en rojo.
 # ⚠️ S193 (A113; A/B #813, decisión de Nicolás del 2026-11-21): producción enciende el día de MODIS y el laboratorio,
 # que no se midió de día, lo declara apagado (pipeline/profiles/laboratorio.yaml, `paths`). Texto original: sin
 # ENABLE_DAYTIME_MODIS.
@@ -90,6 +93,7 @@ def test_g1_la_via_esta_encendida_en_los_tres_sensores_y_la_zona_con_el_valor_el
     assert lab.get("ENABLE_LAB_ZONA_A") == "True", lab.get("ENABLE_LAB_ZONA_A")   # S203: antes "False"
     zona = ast.literal_eval(lab["LAB_ZONA_A"])
     assert zona.get("extension") == "MEJ-5" and zona.get("radio") == "inner_radius_km", zona
+    # ⚠️ S203 (A113): lo que sigue describía el paso 3; desde el paso 4 la zona está encendida (aserciones de arriba).
     # S195 (paso 3): la zona ya tiene efecto en la vía, pero el laboratorio sigue apagado y sin valor: el valor sale del
     # barrido de 9 brazos (perfiles _s195_lab_*, evaluar.py calibrar) y lo fija el paso 4. Texto anterior del mensaje:
     # «el umbral de la zona A se elige en el paso 3 del plan S190, no antes».
