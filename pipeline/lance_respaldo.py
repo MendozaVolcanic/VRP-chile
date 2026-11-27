@@ -28,6 +28,7 @@ con el mismo número (`fileId`) que CMR usa en `GranuleUR` (`LANCEMODIS:<fileId>
 es el mismo archivo, con el mismo enlace, que el que habría dado CMR. Sin cambio científico.
 """
 import json
+import math
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -79,6 +80,51 @@ def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
         return [c for c in datos.get("content", [])
                 if c.get("resourceType") == "File" and c.get("products") == short_name]
     raise LanceNoResponde("; ".join(errores))
+
+
+# Tolerancia del filtro espacial, en km sobre el radio de búsqueda. POR QUÉ existe el filtro: la búsqueda por región de
+# LANCE devuelve también gránulos cuyo polígono queda a cientos de km de la caja (Láscar 2026-11-27: NOAA-21 04:12 con
+# el borde a 573 km). POR QUÉ tan generoso: el polígono GRing de LANCE tiene sólo cuatro esquinas y no sigue el borde
+# curvo de la pasada, así que no reproduce a CMR. Calibrado contra CMR sano (2026-11-21, 23 y 25; Láscar, Villarrica,
+# Nevados de Chillán y Chaitén; VJ102IMG_NRT, VJ202MOD_NRT, MOD021KM y MYD021KM; 176 gránulos de LANCE,
+# D:\vrp-trabajo\temporales\s203\lance_vivo\salida_calibrar_filtro.txt): con 25 km se pierden 5 de 123 pasadas que CMR
+# lista; con 100 km, 1 (diurna) y entran 23 de más. Uno de más no hace daño: si no cubre el volcán, la vía devuelve None
+# y no hay record (mirova_v750_codigo.calcular_vrp_granulo: menos de 100 píxeles a menos de 45 km del cráter); sólo
+# cuesta su descarga, y sólo cuando CMR falló.
+TOLERANCIA_KM = 100.0
+
+
+def _plano(lon, lat, lon0, lat0):
+    return (lon - lon0) * 111.32 * math.cos(math.radians(lat0)), (lat - lat0) * 111.0
+
+
+def _cruzan(p1, p2, q1, q2):
+    def o(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    return o(p1, p2, q1) * o(p1, p2, q2) < 0 and o(q1, q2, p1) * o(q1, q2, p2) < 0
+
+
+def _dentro(pt, poly):
+    c = False
+    for i in range(len(poly)):
+        (x1, y1), (x2, y2) = poly[i], poly[(i + 1) % len(poly)]
+        if (y1 > pt[1]) != (y2 > pt[1]) and pt[0] < (x2 - x1) * (pt[1] - y1) / (y2 - y1) + x1:
+            c = not c
+    return c
+
+
+def toca_caja(item: dict, lat: float, lon: float, media_km: float) -> bool:
+    """True si el polígono GRing del gránulo corta el cuadrado de lado 2·media_km centrado en (lat, lon), en plano
+    local. Sin polígono legible, True: ante la duda se baja y la vía decide si cubre el volcán."""
+    try:
+        poly = [_plano(float(item["gringLongitude%d" % k]), float(item["gringLatitude%d" % k]), lon, lat)
+                for k in (1, 2, 3, 4)]
+    except (KeyError, TypeError, ValueError):
+        return True
+    caja = [(-media_km, -media_km), (media_km, -media_km), (media_km, media_km), (-media_km, media_km)]
+    if any(_dentro(c, poly) for c in caja) or any(abs(x) <= media_km and abs(y) <= media_km for x, y in poly):
+        return True
+    return any(_cruzan(poly[i], poly[(i + 1) % 4], caja[j], caja[(j + 1) % 4]) for i in range(4) for j in range(4))
 
 
 def a_granulo(item: dict, short_name: str, version: str):

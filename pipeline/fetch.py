@@ -10,8 +10,11 @@
 #                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py; tambien, por
 #                 volcan y dia, la busqueda vacia, el L1B sin geolocalizacion y el dia parcial (S159, I1). S199
 #                 (F6-112): tambien cada busqueda hecha (ok o fallida) y el minuto de la pasada que no se bajo.
+#                 S203: si CMR da vacio, falla o dice estar congelado, las pasadas NRT de los ultimos 10 dias
+#                 que CMR no lista se completan con el buscador propio de LANCE (lance_respaldo.py): mismo
+#                 archivo y mismo enlace; el procesador decide, como siempre, si la escena cubre el volcan.
 # Modelo/método : Reglas deterministicas de busqueda y descarga. Sin aprendizaje automatico.
-# Datos entrada : Catalogo CMR y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
+# Datos entrada : Catalogo CMR (y, de respaldo, la API de LANCE) y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
 #                 VNP02MOD/VJ102MOD/VJ202MOD y sus geolocalizaciones; scripts/ceses_esperados.json. SIN datos
 #                 personales.
 # Variables     : Caja de busqueda (radius_km del volcan), dia UTC, orden definitivo/NRT, filtro nocturno,
@@ -1096,6 +1099,8 @@ def search_granules(product_key: str, lat: float, lon: float,
     ya = {_minuto_granulo(g) for g in res}
     nuevos = []
     for it in items:
+        if not lance_respaldo.toca_caja(it, lat, lon, radius_km + lance_respaldo.TOLERANCIA_KM):
+            continue
         g = lance_respaldo.a_granulo(it, *clave_nrt)
         m = _minuto_granulo(g)
         if m not in ya:

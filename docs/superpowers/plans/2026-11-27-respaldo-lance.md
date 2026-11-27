@@ -52,7 +52,13 @@ cambia la cadencia del NRT; no usa NODD de NOAA (otra calibración, decisión 3 
    responde o da vacío, todo queda como hoy.
 5. **Aviso.** Una vez por proceso, en Actions, `::warning::` «Catálogo CMR de NASA congelado o caído: N pasadas
    tomadas de LANCE» y una línea en el resumen del job; fuera de Actions, sólo `_diag`.
-6. **Interruptor.** `VRP_LANCE_RESPALDO=0` apaga todo (variable de infraestructura, como `VRP_CMR_BREAKER`).
+6. **Filtro espacial generoso (agregado al ejecutar, tras la prueba en vivo).** La búsqueda por región de LANCE devuelve
+   también gránulos lejanos (Láscar 27-nov: NOAA-21 04:12 con el borde a 573 km), y su polígono GRing de cuatro
+   esquinas no reproduce a CMR. Calibrado contra CMR sano (21, 23 y 25-nov; 4 volcanes, 4 productos, 176 gránulos;
+   `D:\vrp-trabajo\temporales\s203\lance_vivo\salida_calibrar_filtro.txt`): con 25 km de tolerancia se pierden 5 de
+   123 pasadas de CMR; con 100 km, 1 (diurna) y entran 23 de más. Se usa 100 km: uno de más no hace daño, porque si no
+   cubre el volcán la vía devuelve None y no hay record (`calcular_vrp_granulo`); sólo cuesta su descarga.
+7. **Interruptor.** `VRP_LANCE_RESPALDO=0` apaga todo (variable de infraestructura, como `VRP_CMR_BREAKER`).
 
 ### Archivos
 

@@ -112,8 +112,12 @@ def test_consultar_cae_al_espejo_y_despues_falla(monkeypatch):
         return _Resp(json.dumps({"content": [ITEM_VJ1]}).encode())
 
     monkeypatch.setattr(L, "_abrir", falso)
-    assert len(L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27")) == 1
-    assert hosts == ["nrt3.modaps.eosdis.nasa.gov", "nrt4.modaps.eosdis.nasa.gov"]
+    try:
+        n = len(L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27"))
+    except L.LanceNoResponde:
+        n = None   # sin espejo: la caída de nrt3 dejaría sin respaldo
+    assert n == 1
+    assert hosts ==["nrt3.modaps.eosdis.nasa.gov", "nrt4.modaps.eosdis.nasa.gov"]
 
     def todo_caido(url, timeout=None):
         raise OSError("caido")
@@ -272,6 +276,44 @@ def test_lance_ajeno_al_producto_no_se_mezcla(entorno):
     se comprueba que la envoltura no agrega lo que la consulta no devolvió."""
     entorno["lance"] = []
     assert _buscar() == []
+
+
+# ── Filtro espacial (polígonos reales de LANCE, VJ202MOD_NRT del 2026-11-27, caja de Láscar) ────────────────────
+def _poly(lat, lon):
+    return {"gringLatitude%d" % (k + 1): v for k, v in enumerate(lat)} | \
+           {"gringLongitude%d" % (k + 1): v for k, v in enumerate(lon)}
+
+
+G_0548 = _poly([-25.112, -20.621, -0.218, -4.326], [-56.261, -85.498, -79.506, -52.787])    # CMR la lista
+G_0554 = _poly([-45.775, -40.077, -20.509, -24.998], [-57.91, -95.164, -85.474, -56.255])   # contiene a Láscar
+G_0412 = _poly([-43.996, -38.455, -18.781, -23.21], [-32.493, -68.702, -59.472, -30.642])   # borde a cientos de km
+
+
+def test_toca_caja_con_poligonos_reales():
+    media = 25 + L.TOLERANCIA_KM
+    assert L.toca_caja(G_0554, -23.37, -67.73, media)
+    assert L.toca_caja(G_0548, -23.37, -67.73, media)        # el GRing la deja 2 km fuera; la tolerancia la recupera
+    assert not L.toca_caja(G_0548, -23.37, -67.73, 0.001)    # sin tolerancia quedaría fuera (por eso existe)
+    assert not L.toca_caja(G_0412, -23.37, -67.73, media)
+    assert L.toca_caja({}, -23.37, -67.73, media)             # sin polígono: ante la duda se baja
+
+
+def test_tolerancia_recupera_un_borde_a_60_km():
+    """Con CMR sano, pasadas que CMR lista quedaban con el GRing a 50 o más km de la caja (Villarrica VJ102IMG_NRT
+    2026-11-25 18:12; salida_calibrar_filtro.txt): un borde a 60 km de la caja tiene que entrar."""
+    import math
+    k = 111.32 * math.cos(math.radians(-23.37))
+    oeste = -67.73 - (25 + 60) / k                        # borde este del polígono a 60 km de la caja
+    poly = _poly([-30.0, -30.0, -15.0, -15.0], [oeste - 5, oeste, oeste, oeste - 5])
+    assert L.toca_caja(poly, -23.37, -67.73, 25 + L.TOLERANCIA_KM)
+    assert not L.toca_caja(poly, -23.37, -67.73, 25 + 50)
+
+
+def test_search_granules_descarta_lo_lejano(entorno):
+    entorno["lance"] = [dict(item("VJ202MOD_NRT", "04:12", 1), **G_0412),
+                        dict(item("VJ202MOD_NRT", "05:54", 2), **G_0554)]
+    res = _buscar("VIIRS_NOAA21_MOD_L1B")
+    assert [g["umm"]["GranuleUR"] for g in res] == ["LANCEMODIS:2"]
 
 
 # ── Integración liviana con el resto del flujo ──────────────────────────────────────────────────────────────────
