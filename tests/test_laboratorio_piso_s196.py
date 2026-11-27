@@ -267,7 +267,10 @@ def test_q5_el_piso_se_resuelve_por_perfil_y_volcan():
     assert _piso_zona_a(CONTROL, "Villarrica") == [5.0, PISO_PROD]
     assert _piso_zona_a(brazo(GRILLA[-1]), "PuyehueCordonCaulle") == [None, None]
     assert _piso_zona_a("_s195_lab_s30", "Villarrica") == [3.0, None]          # sin la clave: piso de producción
-    for perfil in ("mirova_equivalent", "laboratorio", SINZONA, "guardia_k_modis", "guardia_k_viirs", "sombra_34"):
+    # S203 (paso 4): el laboratorio se encendió con el valor elegido; los demás siguen sin zona.
+    assert _piso_zona_a("laboratorio", "Villarrica") == [S_A, 0.0025]
+    assert _piso_zona_a("laboratorio", "PuyehueCordonCaulle") == [None, None]
+    for perfil in ("mirova_equivalent", SINZONA, "guardia_k_modis", "guardia_k_viirs", "sombra_34"):
         assert _piso_zona_a(perfil, "Villarrica") == [None, None], perfil
 
 
@@ -282,8 +285,9 @@ def test_q5_el_perfil_rechaza_un_piso_invalido(piso):
 
 
 def test_q5_ningun_perfil_operacional_declara_el_piso():
+    """S203: el laboratorio (no operacional) declara el piso elegido desde el paso 4; ningún otro perfil lo declara."""
     for y in PERFILES.glob("*.yaml"):
-        if y.stem.startswith("_s196_lab_"):
+        if y.stem.startswith("_s196_lab_") or y.stem == "laboratorio":
             continue
         assert not re.search(r"^\s*piso\s*:", y.read_text(encoding="utf-8"), re.M), y.name
 
@@ -311,15 +315,30 @@ def test_q6_los_brazos_son_la_grilla_sellada():
     assert len(BRAZOS) == 7 and brazo(0.003) == "_s196_lab_p300" and brazo(0.0015) == "_s196_lab_p150"
 
 
-def test_q6_el_brazo_sin_zona_es_el_laboratorio_en_otra_carpeta(resueltos):
+def test_q6_el_laboratorio_es_el_brazo_elegido_en_otra_carpeta(resueltos):
+    """S203 (paso 4): el laboratorio se encendió con el valor que eligió la calibración (s 3, piso 0,0025): tiene que ser
+    el brazo _s196_lab_p250 del barrido, salvo nombre y carpeta, para que lo medido en la calibración sea lo que corre.
+    Texto anterior (zona apagada): «el brazo sin zona es el laboratorio en otra carpeta»; ese papel lo cumple hoy
+    SINZONA y lo vigila la prueba de abajo."""
+    lab, elegido = resueltos["laboratorio"], resueltos[brazo(0.0025)]
+    assert {k for k in set(lab) | set(elegido) if lab.get(k) != elegido.get(k)} == {"PROFILE_NAME", "DATA_SUBDIR"}
+    assert lab["ENABLE_LAB_ZONA_A"] == "True"
+    z = ast.literal_eval(lab["LAB_ZONA_A"])
+    assert (z["valor"], z["piso"]) == (S_A, 0.0025), z
+
+
+def test_q6_el_brazo_sin_zona_es_el_laboratorio_apagado(resueltos):
+    """El laboratorio difiere del brazo sin zona sólo en la zona (encendida y con valor y piso)."""
     lab, sz = resueltos["laboratorio"], resueltos[SINZONA]
-    assert {k for k in set(lab) | set(sz) if lab.get(k) != sz.get(k)} == {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert ast.literal_eval(sz["DATA_SUBDIR"]) == SINZONA
+    difieren = {k for k in set(lab) | set(sz) if lab.get(k) != sz.get(k)}
+    assert difieren == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_LAB_ZONA_A", "LAB_ZONA_A"}, difieren
+    assert sz["ENABLE_LAB_ZONA_A"] == "False" and ast.literal_eval(sz["DATA_SUBDIR"]) == SINZONA
 
 
 @pytest.mark.parametrize("perfil", (CONTROL,) + BRAZOS)
-def test_q6_cada_brazo_difiere_del_laboratorio_solo_en_la_zona(resueltos, perfil):
-    lab, b = resueltos["laboratorio"], resueltos[perfil]
+def test_q6_cada_brazo_difiere_del_laboratorio_apagado_solo_en_la_zona(resueltos, perfil):
+    # S203: la referencia «laboratorio con la zona apagada» es hoy SINZONA (el laboratorio se encendió en el paso 4).
+    lab, b = resueltos[SINZONA], resueltos[perfil]
     difieren = {k for k in set(lab) | set(b) if lab.get(k) != b.get(k)}
     assert difieren == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_LAB_ZONA_A", "LAB_ZONA_A"}, difieren
     assert ast.literal_eval(b["DATA_SUBDIR"]) == perfil and b["ENABLE_LAB_ZONA_A"] == "True"

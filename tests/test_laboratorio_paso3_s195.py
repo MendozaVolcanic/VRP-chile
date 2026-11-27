@@ -39,6 +39,10 @@ SCRIPT = RAIZ / "tests" / "_pasada_sintetica_laboratorio.py"
 FLUJO = RAIZ / ".github" / "workflows" / "reproc-s195-lab-barrido.yml"
 FAMILIAS = ("MODIS", "VIIRS750", "VIIRS375")
 CONTROL = "_s195_lab_control"
+# S203 (paso 4): el perfil `laboratorio` se encendió con s 3 y piso 0,0025. Estas pruebas lo usaban como «el
+# laboratorio con la zona apagada» (gemelo de producción); ese papel lo cumple hoy el brazo _s196_lab_sinzona, que es el
+# laboratorio anterior en otra carpeta (tests/test_laboratorio_piso_s196.py::test_q6_el_brazo_sin_zona_es_el_laboratorio_apagado).
+LAB_APAGADO = "_s196_lab_sinzona"
 COD = ("import json, pipeline.profile as p; print('@@' + json.dumps({k: repr(getattr(p, k)) for k in dir(p) "
        "if k.isupper() and k != 'VALID_PROFILES'}))")
 
@@ -79,7 +83,7 @@ def _alertados(rec):
 # ------------------------------------------------------------------------------------------------ P1 y P2 (calor)
 @pytest.fixture(scope="module")
 def calor():
-    perfiles = ("mirova_equivalent", "laboratorio", CONTROL, brazo(5.0))
+    perfiles = ("mirova_equivalent", LAB_APAGADO, CONTROL, brazo(5.0))
     return {p: _arroba(_correr([str(SCRIPT)], p), f"la pasada con calor ({p})") for p in perfiles}
 
 
@@ -90,7 +94,7 @@ def test_p1_p2_control_la_escena_con_calor_detecta_con_la_via(calor, familia):
         assert r.get("via_codigo_mirova") is True and (r.get("vrp_mw") or 0) > 0, (perfil, familia, r.get("vrp_mw"))
 
 
-@pytest.mark.parametrize("perfil", ("laboratorio", CONTROL, "_s195_lab_s50"))
+@pytest.mark.parametrize("perfil", (LAB_APAGADO, CONTROL, "_s195_lab_s50"))
 @pytest.mark.parametrize("familia", FAMILIAS)
 def test_p1_p2_zona_apagada_o_s5_es_produccion_byte_a_byte_con_calor(calor, perfil, familia):
     a = json.dumps(calor[perfil][familia], sort_keys=True, default=float)
@@ -222,14 +226,14 @@ def _s_zona_a(perfil, volcan):
 def test_p5_cordon_caulle_queda_fuera_y_la_zona_apagada_no_da_multiplicador():
     assert _s_zona_a(brazo(2.0), "Villarrica") == 2.0                  # control: encendida, un volcán dentro
     assert _s_zona_a(brazo(2.0), "PuyehueCordonCaulle") is None
-    for perfil in ("mirova_equivalent", "laboratorio", CONTROL, "guardia_k_modis", "guardia_k_viirs", "sombra_34"):
+    for perfil in ("mirova_equivalent", LAB_APAGADO, CONTROL, "guardia_k_modis", "guardia_k_viirs", "sombra_34"):
         assert _s_zona_a(perfil, "Villarrica") is None, perfil
 
 
 # ------------------------------------------------------------------------------------------------ P7
 @pytest.fixture(scope="module")
 def resueltos():
-    return {p: _arroba(_correr(["-c", COD], p), f"el perfil {p}") for p in ("laboratorio", CONTROL, *BRAZOS)}
+    return {p: _arroba(_correr(["-c", COD], p), f"el perfil {p}") for p in (LAB_APAGADO, CONTROL, *BRAZOS)}
 
 
 def test_p7_los_brazos_son_la_grilla_sellada():
@@ -239,14 +243,14 @@ def test_p7_los_brazos_son_la_grilla_sellada():
 
 
 def test_p7_el_control_es_el_laboratorio_en_otra_carpeta(resueltos):
-    lab, ctl = resueltos["laboratorio"], resueltos[CONTROL]
+    lab, ctl = resueltos[LAB_APAGADO], resueltos[CONTROL]
     assert {k for k in set(lab) | set(ctl) if lab.get(k) != ctl.get(k)} == {"PROFILE_NAME", "DATA_SUBDIR"}
     assert ast.literal_eval(ctl["DATA_SUBDIR"]) == CONTROL
 
 
 @pytest.mark.parametrize("s", GRILLA_S)
 def test_p7_cada_brazo_difiere_del_laboratorio_solo_en_la_zona(resueltos, s):
-    lab, b = resueltos["laboratorio"], resueltos[brazo(s)]
+    lab, b = resueltos[LAB_APAGADO], resueltos[brazo(s)]
     difieren = {k for k in set(lab) | set(b) if lab.get(k) != b.get(k)}
     assert difieren == {"PROFILE_NAME", "DATA_SUBDIR", "ENABLE_LAB_ZONA_A", "LAB_ZONA_A"}, difieren
     assert ast.literal_eval(b["DATA_SUBDIR"]) == brazo(s)
