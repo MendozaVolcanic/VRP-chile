@@ -34,6 +34,23 @@ import os  # noqa: E402
 import pytest  # noqa: E402
 
 
+# S203: el respaldo por LANCE (pipeline/lance_respaldo.py) consulta la red cuando CMR da vacío para un día reciente.
+# POR QUÉ este bloqueo: las pruebas que simulan un CMR vacío o caído saldrían a internet a preguntarle a LANCE y a la
+# salud de CMR, y su resultado dependería de NASA. Con la red de LANCE bloqueada, el respaldo ve «LANCE no responde» y
+# la búsqueda devuelve lo de CMR tal cual, como antes de S203. Las pruebas del respaldo reemplazan estas funciones.
+@pytest.fixture(autouse=True)
+def _lance_sin_red(monkeypatch):
+    from pipeline import lance_respaldo
+
+    def _bloqueada(url, timeout=None):
+        raise OSError("red de LANCE bloqueada en las pruebas (tests/conftest.py)")
+
+    monkeypatch.setattr(lance_respaldo, "_abrir", _bloqueada)
+    lance_respaldo.reiniciar()
+    yield
+    lance_respaldo.reiniciar()
+
+
 @pytest.fixture(autouse=True)
 def _perfil_no_se_fuga_entre_tests():
     env_antes = os.environ.get("VRP_PROFILE")
