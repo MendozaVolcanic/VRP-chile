@@ -10,8 +10,11 @@
 #                 toda la corrida, queda en la cobertura que informa scripts/run_pipeline.py; tambien, por
 #                 volcan y dia, la busqueda vacia, el L1B sin geolocalizacion y el dia parcial (S159, I1). S199
 #                 (F6-112): tambien cada busqueda hecha (ok o fallida) y el minuto de la pasada que no se bajo.
+#                 S203: si CMR da vacio, falla o dice estar congelado, las pasadas NRT de los ultimos 10 dias
+#                 que CMR no lista se completan con el buscador propio de LANCE (lance_respaldo.py): mismo
+#                 archivo y mismo enlace; el procesador decide, como siempre, si la escena cubre el volcan.
 # Modelo/método : Reglas deterministicas de busqueda y descarga. Sin aprendizaje automatico.
-# Datos entrada : Catalogo CMR y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
+# Datos entrada : Catalogo CMR (y, de respaldo, la API de LANCE) y granulos MOD021KM/MYD021KM, MOD03/MYD03, VNP02IMG/VJ102IMG/VJ202IMG,
 #                 VNP02MOD/VJ102MOD/VJ202MOD y sus geolocalizaciones; scripts/ceses_esperados.json. SIN datos
 #                 personales.
 # Variables     : Caja de busqueda (radius_km del volcan), dia UTC, orden definitivo/NRT, filtro nocturno,
@@ -1018,10 +1021,147 @@ def _buscar_dia_con_reintento(product_key, short_name, ver, bbox, date_str):
             _diag(f"SEARCH_DIA_REINTENTO intento={k} [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
 
 
+# ── S203: respaldo de búsqueda por LANCE (plan docs/superpowers/plans/2026-11-27-respaldo-lance.md) ──
+# POR QUÉ: las pasadas NRT llegan primero a LANCE y segundos después CMR las cataloga. Cuando el indexador de CMR se
+# cae (26-nov, aviso 3294) o se congela (27-nov desde ~07:00 UTC, `search/health` con `indexer ok? false`), CMR responde
+# vacío o una lista vieja SIN error: el cortacircuito no salta y el tablero queda atrasado como si el volcán no hubiera
+# tenido pasada (el 27-nov a las 12:37 UTC LANCE tenía 47 VJ102IMG_NRT y 59 MYD021KM del día que CMR no listaba). Aquí
+# se completan esas pasadas con el buscador propio de LANCE (pipeline/lance_respaldo.py): mismo archivo, mismo enlace
+# y mismo token que daría CMR, sin cambio científico. Sólo para productos NRT de los últimos LANCE_DIAS días (lo que
+# LANCE retiene) y sólo cuando la búsqueda en CMR falló (error, timeout o cortacircuito), CMR dice estar congelado
+# (`search/health`, una consulta por proceso) o al catálogo le faltan archivos de ese producto y día (la carpeta de LANCE
+# tiene 3 o más que los que CMR lista; una medición por producto y día por proceso, sólo hoy y ayer): al volver, el indexador cataloga
+# las pasadas nuevas pero no las del tiempo caído (27-nov, 13:36 UTC). Con CMR sano y completo no se busca en LANCE,
+# ni siquiera si CMR responde vacío (el día en curso a las 00 UTC no tiene pasadas; verificador limpio S203, R-3). Nada
+# de lo que pase en LANCE puede quitar lo que CMR ya trajo. Interruptor: VRP_LANCE_RESPALDO=0.
+LANCE_DIAS = 10
+LANCE_DIAS_HUECO = 1
+_RESPALDOS_LANCE: list = []
+_LANCE_AVISADO = False
+
+
+def respaldos_lance() -> list[dict]:
+    """S203: búsquedas completadas con LANCE desde el último reinicio (producto, día, pasadas agregadas)."""
+    return [dict(r) for r in _RESPALDOS_LANCE]
+
+
+def reiniciar_respaldos_lance() -> None:
+    global _LANCE_AVISADO
+    _RESPALDOS_LANCE.clear()
+    _LANCE_AVISADO = False
+
+
+def _avisar_respaldo_lance(n: int, congelado: bool) -> None:
+    """Un aviso por proceso en Actions y una línea en el resumen del job; fuera de Actions basta el _diag."""
+    global _LANCE_AVISADO
+    if _LANCE_AVISADO:
+        return
+    _LANCE_AVISADO = True
+    causa = "congelado (indexador caído)" if congelado else "incompleto o caído"
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning title=Catálogo CMR de NASA {causa}::las pasadas NRT que CMR no lista se toman de "
+              f"LANCE (mismos archivos). Primera búsqueda completada: {n} pasada(s).", flush=True)
+    _escribir_resumen(f"- Catálogo CMR {causa}: pasadas NRT completadas con LANCE (ver `respaldos_lance`).")
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
+    """Busca en CMR (_buscar_en_cmr, sin cambios) y, si hace falta, completa con LANCE (S203, ver el bloque de
+    arriba). Devuelve gránulos de earthaccess; los de LANCE tienen la misma forma que los de CMR."""
+    n_fallas_antes = len(_FALLAS)
+    nrt = PRODUCTS[product_key].get("nrt")
+    hoy = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    dia = date.replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0)
+    aplica = (os.environ.get("VRP_LANCE_RESPALDO", "1") != "0" and bool(nrt)
+              and (hoy - dia).days <= LANCE_DIAS)
+    error_cmr = None
+    try:
+        res = _buscar_en_cmr(product_key, lat, lon, radius_km, date)
+    except EarthdataCredentialError:
+        raise
+    except Exception as e:
+        # Verificador limpio S203 (R-4): un 503 de CMR sale de earthaccess como RuntimeError, no como timeout, y no
+        # pasaba por el respaldo. Se intenta LANCE; si LANCE no trae nada, la excepción sigue como antes.
+        if not aplica:
+            raise
+        error_cmr, res = e, []
+    if not aplica:
+        return res
+    try:
+        nuevos, congelado = _completar_con_lance(product_key, lat, lon, radius_km, date, nrt, res,
+                                                 fallo=error_cmr is not None or len(_FALLAS) > n_fallas_antes)
+    except Exception as e:   # R-5: nada de LANCE puede quitar lo que CMR trajo
+        _diag(f"LANCE_RESPALDO_ERROR [{product_key}] {type(e).__name__}: {str(e)[:120]}")
+        nuevos, congelado = [], None
+    if not nuevos:
+        if error_cmr is not None:
+            raise error_cmr
+        return res
+    # Los datos sí se encontraron: la falla de búsqueda de CMR de este producto no es una pasada perdida.
+    fecha = date.strftime("%Y-%m-%d")
+    fallas_cmr = _FALLAS[n_fallas_antes:]
+    del _FALLAS[n_fallas_antes:]
+    motivo_cmr = "; ".join(f["motivo"] for f in fallas_cmr)
+    if error_cmr is not None:
+        motivo_cmr = (motivo_cmr + "; " if motivo_cmr else "") + f"{type(error_cmr).__name__}: {str(error_cmr)[:120]}"
+    _RESPALDOS_LANCE.append({"producto": product_key, "fecha": fecha, "n": len(nuevos),
+                             "pasadas": [_minuto_granulo(g) for g in nuevos], "congelado": congelado,
+                             "falla_cmr": motivo_cmr})
+    _diag(f"LANCE_RESPALDO [{product_key} {fecha}] +{len(nuevos)} pasada(s) que CMR no listó "
+          f"(CMR: {len(res)}, congelado={congelado}, falla_cmr={bool(motivo_cmr)})")
+    _avisar_respaldo_lance(len(nuevos), congelado)
+    return list(res) + nuevos
+
+
+def _completar_con_lance(product_key, lat, lon, radius_km, date, nrt, res, fallo) -> tuple[list, bool | None]:
+    """Las pasadas que LANCE tiene y `res` no (por minuto de inicio), si corresponde consultar. (nuevos, congelado)."""
+    versiones = nrt["versions"] if isinstance(nrt.get("versions"), list) else [nrt["version"]]
+    clave_nrt = (nrt["short_name"], versiones[0])   # la que publica LANCE hoy (v2.1 en NOAA-20 y 21)
+    colecciones_nrt = {(nrt["short_name"], v) for v in versiones}
+
+    def coleccion(g):
+        ref = (g.get("umm") or {}).get("CollectionReference") or {}
+        return ref.get("ShortName"), ref.get("Version")
+
+    if any(coleccion(g) not in colecciones_nrt for g in res):
+        return [], None   # CMR dio el producto estándar: ese día ya está definitivo
+    from pipeline import lance_respaldo
+    fecha = date.strftime("%Y-%m-%d")
+    congelado = lance_respaldo.catalogo_congelado()
+    # El hueco se mide sólo para hoy y ayer (LANCE_DIAS_HUECO): desde el tercer día el producto estándar ya cubre el día
+    # (_intentos lo pide primero) y cada medición son dos pedidos por producto y día en cada job (verificador limpio S203,
+    # segunda pasada: con 10 días eran hasta 96 listados de LANCE por job con CMR sano).
+    reciente = (datetime.utcnow().date() - date.replace(tzinfo=None).date()).days <= LANCE_DIAS_HUECO
+    if not fallo and not congelado and not (reciente and lance_respaldo.catalogo_incompleto(*clave_nrt, fecha)):
+        return [], congelado   # CMR sano y completo para el producto y día: su respuesta, vacía o no, es la que vale
+    delta = radius_km / 111.0
+    bbox = (lon - delta, lat - delta, lon + delta, lat + delta)
+    try:
+        items = lance_respaldo.consultar(clave_nrt[0], bbox, fecha)
+    except lance_respaldo.LanceNoResponde as e:
+        _diag(f"LANCE_RESPALDO_SIN_RESPUESTA [{product_key} {fecha}] {str(e)[:120]}")
+        return [], congelado
+    ya = {_minuto_granulo(g) for g in res}
+    nuevos = []
+    for it in items:
+        try:
+            if not lance_respaldo.toca_caja(it, lat, lon, radius_km + lance_respaldo.TOLERANCIA_KM):
+                continue
+            g = lance_respaldo.a_granulo(it, *clave_nrt)
+        except (KeyError, TypeError, ValueError) as e:   # R-5: un ítem incompleto se salta, no tumba los demás
+            _diag(f"LANCE_RESPALDO_ITEM_ILEGIBLE [{product_key} {fecha}] {type(e).__name__}: {str(e)[:80]}")
+            continue
+        m = _minuto_granulo(g)
+        if m not in ya:
+            ya.add(m)
+            nuevos.append(g)
+    return nuevos, congelado
+
+
+def _buscar_en_cmr(product_key: str, lat: float, lon: float,
+                   radius_km: float, date: datetime) -> list:
     """
-    Search for granules covering a given location on a given date.
+    Search for granules covering a given location on a given date (sólo CMR; S203: search_granules la envuelve).
 
     Returns a list of earthaccess granule objects.
 
