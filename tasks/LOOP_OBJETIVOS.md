@@ -569,6 +569,22 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-27 18:20 UTC (S203): main v1.120 (#1140, #1142 a #1144); calibrar ELEGIDO s 3 y piso 0,0025; respaldo LANCE en producción; laboratorio NO CUMPLE contra NHI
+- **Merges (uno.sh, ficha al mergear):** #1140 (v1.117, manifiesto con t9 y t10), #1142 (v1.118, corrida de calibrar),
+  #1143 (v1.119, respaldo de búsqueda por LANCE), #1144 (v1.120, laboratorio encendido = brazo p250; tag pre-s203-lab-piso).
+- **Calibrar:** unión de 10 tandas (30.047 records por brazo), 2 escenas de validez distinta (las mismas de septiembre),
+  R5C-103 OK; ELEGIDO s 3 y piso 0,0025 (noche: control 8,3 %, 0,0025 24,8 %, 0,00225 30,7 %); frenos verdes; S200c igual.
+- **Respaldo LANCE:** CMR se congeló el 27-nov desde ~07 UTC y al volver no rellenó el hueco (MYD021KM 151 contra 84).
+  Disparadores: falla de CMR, health caído o ≥3 archivos de más en la carpeta de LANCE (hoy y ayer). Verificador limpio en
+  3 pasadas (enlace nrt4, cortacircuito, CMR sano sin consultas, 503, peor caso 96 a 1 min); 33/33 mutaciones. En la
+  NRT de las 17:50 recuperó pasadas en los 6 productos de Láscar y la Aqua 08:30 quedó publicada.
+- **Laboratorio (pasos 4 y 5):** t11 (15 al 28-feb) y t12 (24 al 26-nov) con 3 brazos, controles idénticos; unión p250
+  31.933 records; vara NHI S194: **NO CUMPLE** (exceso sólo en Planchón-Peteroa, p 0,017; persistencia no supera al
+  sorteo; control nulo; cobertura desigual bajo 5 %). Sin comunicar en detalle ni guardar en el repo: queda a S204.
+- **Decisiones de Nicolás:** «continua con todo», «sigue con lo que recomiendes» (sí a respaldo LANCE y al piso), «cuando
+  termine eso inicia tú misma la siguiente sesión».
+- **Error propio corregido en la sesión:** dije que faltaban las VIIRS del 27-nov leyendo un origin/main viejo.
+
 ### 2026-11-27 04:00 UTC (S202): main v1.116 (#1136 a #1139); re-sello R5C-101 con tres frenos; acta de la ronda 5 aprobada; Terra registrado; 10 de 10 tandas del piso en verde
 - **Merges (uno.sh, ficha al mergear):** #1136 (v1.113, re-sello R5C-101: muestra común entre los nueve brazos y producción; frenos 1 decide su noche, 2 tope 1 %, 3 las publicaciones quitadas no pueden cambiar la elección; sha256 `74d7648b`; 18 pruebas, 15 de 15 mutaciones con fallas por aserción; verificador limpio en dos pasadas), #1137 (v1.115, acta de cierre de la ronda 5 de Codex), #1138 (v1.114, cese de Terra 2026-12-01 en `scripts/ceses_esperados.json` y `frontend/cese_plataformas.js`, verificado en Pages), #1139 (v1.116, manifiesto con t8).
 - **Decisiones de Nicolás:** «Agregar freno 3» (R202V-1 del verificador: la exclusión sólo podía bajar el piso), «Sí, regístralo» (Terra, 00:00 UTC del 1-dic), «Sí, apruebo» (acta), «Sí, cierra».
