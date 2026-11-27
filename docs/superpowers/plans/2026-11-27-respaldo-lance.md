@@ -40,6 +40,15 @@ cambia la cadencia del NRT; no usa NODD de NOAA (otra calibración, decisión 3 
    b. la búsqueda en CMR falló o la saltó el cortacircuito (timeout), o
    c. `search/health` de CMR dice `indexer ok? false` (congelado: lista vieja, como el 27-nov).
    Si CMR devolvió el producto **estándar**, no se consulta (ese día ya está definitivo).
+   **Corregido tras el verificador limpio (R-3) y la medición de las 13:36 UTC del 27-nov:** el disparador (a) «CMR
+   vacío» se quitó (con CMR sano el día en curso a las 00 UTC está vacío y no hay que preguntarle a LANCE), y se agregó
+   (d): la carpeta de LANCE del producto y día tiene 3 o más archivos que los que CMR lista. Al volver, el indexador
+   cataloga las pasadas nuevas pero no las del tiempo caído (MYD021KM día 331: 151 en LANCE, 84 en CMR, con `health`
+   ya sano); en días sanos CMR lista uno más que la carpeta. Además: enlace con el host del propio ítem (R-1),
+   cortacircuito de LANCE y 30 s por host (R-2), un error de CMR que no es timeout también pasa por el respaldo (R-4),
+   y nada de LANCE puede quitar lo que CMR trajo (R-5). Veredicto en
+   `D:\vrp-trabajo\temporales\s203\verif_lance\VEREDICTO.md`; mutaciones 29 de 29 en
+   `D:\vrp-trabajo\temporales\s203\mut_lance\salida_mutar3.txt`.
    Por qué no siempre: con CMR sano el catálogo registra el gránulo segundos después de LANCE (medido en S202: Aqua
    05:25, 06:12:02 en LANCE y 06:12:04 en CMR), y la ayuda de LANCE advierte bloqueo de IP por pedidos excesivos.
 2. **Unión, no reemplazo.** Lo que CMR trajo se queda; se agregan las pasadas de LANCE cuyo minuto de inicio no está.

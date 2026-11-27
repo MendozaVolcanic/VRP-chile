@@ -7,6 +7,7 @@ pierde pasadas que ya están en LANCE (26 y 27-nov). El respaldo tiene que (1) d
 de CMR, porque el resto del flujo (filtro nocturno, pareo L1B y geolocalización, descarga) no cambia; (2) consultar
 LANCE sólo cuando hace falta; (3) no duplicar pasadas ni ocultar una falla que no se recuperó. Todo sin red.
 """
+import http.client as http_client
 import io
 import json
 from datetime import datetime, timedelta
@@ -43,6 +44,15 @@ def item(producto, hhmm, file_id, ext="nc", dia="2026-11-27"):
             "start": "%s %s:00" % (dia, hhmm), "status": "Online", "size": 1}
 
 
+def resultado(f):
+    """("ok", valor) o ("error", excepción): para que una prueba falle por aserción y no por excepción (el contador de
+    mutaciones sólo cuenta aserciones, lección S202)."""
+    try:
+        return "ok", f()
+    except Exception as e:   # noqa: BLE001
+        return "error", e
+
+
 def gran_cmr(short, version, inicio, ur):
     """Gránulo con la forma de los de CMR (lo mínimo que lee el flujo)."""
     from earthaccess.results import DataGranule
@@ -67,6 +77,22 @@ def test_a_granulo_modis_conjunto_61():
     assert g.data_links() == ["https://nrt3.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/61/MYD021KM/"
                               "2026/331/MYD021KM.A2026331.0830.061.2026331100717.NRT.hdf"]
     assert g["umm"]["CollectionReference"]["Version"] == "6.1NRT"
+
+
+def test_a_granulo_del_espejo_apunta_al_espejo():
+    """R-1: nrt4 da otro archivo (otra marca de producción) para la misma pasada; su nombre sólo existe en nrt4.
+    Enlace leído del listado allData de nrt4 el 2026-11-27."""
+    it = dict(ITEM_MYD, downloadsLink="https://nrt4.modaps.eosdis.nasa.gov/api/v2/content/archives/"
+                                      "MYD03.A2026331.0830.061.2026331095452.NRT.hdf")
+    g = L.a_granulo(it, "MYD03", "6.1NRT")
+    assert g.data_links() == ["https://nrt4.modaps.eosdis.nasa.gov/api/v2/content/archives/allData/61/MYD03/2026/331/"
+                              "MYD03.A2026331.0830.061.2026331095452.NRT.hdf"]
+
+
+def test_a_granulo_rechaza_un_host_ajeno():
+    with pytest.raises(ValueError):
+        L.a_granulo(dict(ITEM_VJ1, downloadsLink="https://otro.example/x/VJ102IMG_NRT.A2026331.0506.021.nc"),
+                    "VJ102IMG_NRT", "2.1")
 
 
 def test_conjunto_por_producto():
@@ -127,6 +153,36 @@ def test_consultar_cae_al_espejo_y_despues_falla(monkeypatch):
         L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27")
 
 
+def test_cortacircuito_de_lance(monkeypatch):
+    """R-2: con nrt3 y nrt4 caídos, la segunda consulta del proceso no espera a la red."""
+    llamadas = []
+
+    def todo_caido(url, timeout=None):
+        llamadas.append(url)
+        raise OSError("caido")
+
+    monkeypatch.setattr(L, "_abrir", todo_caido)
+    L.reiniciar()
+    for _ in range(3):
+        with pytest.raises(L.LanceNoResponde):
+            L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27")
+    assert len(llamadas) == 2 and L.TIMEOUT_S <= 30
+    L.reiniciar()
+
+
+def test_respuesta_cortada_cae_al_espejo(monkeypatch):
+    """R-5: IncompleteRead no es OSError; antes se escapaba y botaba lo de CMR."""
+    def falso(url, timeout=None):
+        if "nrt3" in url:
+            raise http_client.IncompleteRead(b"{")
+        return _Resp(json.dumps({"content": [ITEM_VJ1]}).encode())
+
+    monkeypatch.setattr(L, "_abrir", falso)
+    L.reiniciar()
+    estado, val = resultado(lambda: L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27"))
+    assert estado == "ok" and len(val) == 1, val
+
+
 # ── Tarea 3: salud de CMR ─────────────────────────────────────────────────────────────────────────────────────────
 @pytest.mark.parametrize("cuerpo,esperado", [
     ({"internal-metadata-db": {"ok?": True}, "indexer": {"ok?": False}}, True),
@@ -150,6 +206,65 @@ def test_catalogo_congelado(monkeypatch, cuerpo, esperado):
     assert len(llamadas) == 1   # una vez por proceso
 
 
+class _RespH(_Resp):
+    def __init__(self, datos, headers=None):
+        super().__init__(datos)
+        self.headers = headers or {}
+
+
+def _incompleto_con(monkeypatch, n_cmr, n_lance, nrt3_caido=False):
+    urls = []
+
+    def falso(url, timeout=None):
+        urls.append(url)
+        if "cmr.earthdata" in url:
+            return _RespH(b"{}", {"CMR-Hits": str(n_cmr)})
+        if nrt3_caido and "nrt3" in url:
+            raise OSError("caido")
+        cont = [{"resourceType": "File", "name": "f%d" % i} for i in range(n_lance)] + [{"resourceType": "Directory"}]
+        return _RespH(json.dumps({"content": cont}).encode())
+
+    monkeypatch.setattr(L, "_abrir", falso)
+    L.reiniciar()
+    return urls
+
+
+@pytest.mark.parametrize("n_cmr,n_lance,esperado", [
+    (241, 240, False),   # día sano: CMR lista uno más (el del borde del día anterior)
+    (84, 86, False),     # dos de más: todavía latencia
+    (84, 87, True),      # tres de más: hueco del catálogo
+    (84, 151, True),     # 27-nov, MYD021KM, 13:36 UTC
+])
+def test_catalogo_incompleto_umbral(monkeypatch, n_cmr, n_lance, esperado):
+    urls = _incompleto_con(monkeypatch, n_cmr, n_lance)
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27") is esperado
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27") is esperado
+    assert len(urls) == 2                                            # una medición por producto y día
+    assert "page_size=0" in urls[0] and "version=6.1NRT" in urls[0]
+    assert urls[1].endswith("/api/v2/content/details/allData/61/MYD021KM/2026/331")
+
+
+def test_catalogo_incompleto_usa_el_espejo_y_sin_red_es_falso(monkeypatch):
+    urls = _incompleto_con(monkeypatch, 84, 151, nrt3_caido=True)
+    assert L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27") is True
+    assert "nrt4" in urls[-1]
+
+    def caido(url, timeout=None):
+        raise OSError("sin red")
+
+    monkeypatch.setattr(L, "_abrir", caido)
+    L.reiniciar()
+    assert L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27") is False
+
+
+def test_cmr_sano_pero_incompleto_toma_lance(entorno):
+    """27-nov 13:36 UTC: health sano, pero CMR sin la pasada 06:48 que LANCE tiene."""
+    entorno["incompleto"] = True
+    entorno["cmr"] = [gran_cmr("VJ102IMG_NRT", "2.1", DIA + "T05:06:00.000Z", "LANCEMODIS:1")]
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1, dia=DIA), item("VJ102IMG_NRT", "06:48", 2, dia=DIA)]
+    assert [g["umm"]["GranuleUR"] for g in _buscar()] == ["LANCEMODIS:1", "LANCEMODIS:2"]
+
+
 def test_catalogo_congelado_sin_red_es_falso(monkeypatch):
     def caido(url, timeout=None):
         raise OSError("sin red")
@@ -168,9 +283,11 @@ DIA = HOY.strftime("%Y-%m-%d")
 def entorno(monkeypatch):
     """CMR y LANCE falsos; devuelve un dict para fijar lo que responde cada uno y contar consultas a LANCE."""
     estado = {"cmr": [], "falla_cmr": False, "lance": [], "lance_caido": False, "congelado": False,
-              "consultas": []}
+              "consultas": [], "cmr_error": None, "incompleto": False}
 
     def cmr_falso(product_key, lat, lon, radius_km, date):
+        if estado["cmr_error"] is not None:
+            raise estado["cmr_error"]
         if estado["falla_cmr"]:
             fetch._registrar_falla(product_key, date.strftime("%Y-%m-%d"), "SEARCH_CMR_TIMEOUT: ReadTimeout")
         return list(estado["cmr"])
@@ -184,6 +301,7 @@ def entorno(monkeypatch):
     monkeypatch.setattr(fetch, "_buscar_en_cmr", cmr_falso)
     monkeypatch.setattr(L, "consultar", lance_falso)
     monkeypatch.setattr(L, "catalogo_congelado", lambda: estado["congelado"])
+    monkeypatch.setattr(L, "catalogo_incompleto", lambda s, v, f: estado["incompleto"])
     monkeypatch.delenv("VRP_LANCE_RESPALDO", raising=False)
     fetch.limpiar_fallas()
     fetch.reiniciar_respaldos_lance()
@@ -196,12 +314,73 @@ def _buscar(clave="VIIRS_NOAA20_L1B", dia=HOY):
     return fetch.search_granules(clave, -23.37, -67.73, 25, dia)
 
 
-def test_cmr_vacio_toma_lance(entorno):
+def test_cmr_congelado_y_vacio_toma_lance(entorno):
+    entorno["congelado"] = True
     entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1), item("VJ102IMG_NRT", "06:48", 2)]
     res = _buscar()
     assert [g["umm"]["GranuleUR"] for g in res] == ["LANCEMODIS:1", "LANCEMODIS:2"]
     assert entorno["consultas"] == [("VJ102IMG_NRT", DIA)]
     assert fetch.respaldos_lance()[0]["n"] == 2
+
+
+def test_cmr_sano_y_vacio_no_consulta_lance(entorno):
+    """R-3 del verificador: el día en curso a las 00 UTC no tiene pasadas; con CMR sano su vacío es la respuesta."""
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1)]
+    assert _buscar() == []
+    assert entorno["consultas"] == []
+
+
+def test_cmr_con_error_503_toma_lance(entorno):
+    """R-4: un 503 de CMR sale de earthaccess como RuntimeError; antes no pasaba por el respaldo."""
+    entorno["cmr_error"] = RuntimeError("CMR 503 Service Unavailable")
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1, dia=DIA)]
+    assert [g["umm"]["GranuleUR"] for g in _buscar()] == ["LANCEMODIS:1"]
+    assert "RuntimeError: CMR 503" in fetch.respaldos_lance()[0]["falla_cmr"]
+
+
+def test_cmr_con_error_y_lance_vacio_propaga_el_error(entorno):
+    entorno["cmr_error"] = RuntimeError("CMR 503 Service Unavailable")
+    estado, val = resultado(_buscar)
+    assert estado == "error" and isinstance(val, RuntimeError) and "CMR 503" in str(val), (estado, val)
+    assert entorno["consultas"] == [("VJ102IMG_NRT", DIA)]
+
+
+def test_credencial_muerta_no_pasa_por_lance(entorno):
+    entorno["cmr_error"] = fetch.EarthdataCredentialError("401")
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1)]
+    estado, val = resultado(_buscar)
+    assert estado == "error" and isinstance(val, fetch.EarthdataCredentialError), (estado, val)
+    assert entorno["consultas"] == []
+
+
+def test_error_inesperado_de_lance_no_quita_lo_de_cmr(entorno, monkeypatch):
+    """R-5: nada de lo que pase en LANCE puede quitar lo que CMR trajo."""
+    entorno["congelado"] = True
+    entorno["cmr"] = [gran_cmr("VJ102IMG_NRT", "2.1", DIA + "T05:06:00.000Z", "LANCEMODIS:1")]
+
+    def revienta(*a, **k):
+        raise http_client.IncompleteRead(b"")
+
+    monkeypatch.setattr(L, "consultar", revienta)
+    estado, val = resultado(_buscar)
+    assert estado == "ok" and [g["umm"]["GranuleUR"] for g in val] == ["LANCEMODIS:1"], (estado, val)
+
+
+def test_item_ilegible_se_salta_sin_tumbar_los_demas(entorno):
+    entorno["congelado"] = True
+    malo = item("VJ102IMG_NRT", "05:06", 1)
+    del malo["start"]
+    entorno["lance"] = [malo, item("VJ102IMG_NRT", "06:48", 2)]
+    assert [g["umm"]["GranuleUR"] for g in _buscar()] == ["LANCEMODIS:2"]
+
+
+def test_fecha_con_zona_horaria(entorno):
+    from datetime import timezone
+    entorno["congelado"] = True
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1, dia=DIA)]
+    estado, val = resultado(lambda: fetch.search_granules("VIIRS_NOAA20_L1B", -23.37, -67.73, 25,
+                                                          HOY.replace(tzinfo=timezone.utc)))
+    assert estado == "ok" and len(val) == 1, (estado, val)
 
 
 def test_estandar_de_cmr_no_consulta_lance(entorno):
@@ -228,6 +407,7 @@ def test_nrt_sano_no_consulta_lance(entorno):
 
 
 def test_dia_viejo_no_consulta(entorno):
+    entorno["congelado"] = True
     entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1)]
     assert _buscar(dia=HOY - timedelta(days=fetch.LANCE_DIAS + 1)) == []
     assert entorno["consultas"] == []
@@ -236,6 +416,7 @@ def test_dia_viejo_no_consulta(entorno):
 
 def test_interruptor_apaga(entorno, monkeypatch):
     monkeypatch.setenv("VRP_LANCE_RESPALDO", "0")
+    entorno["congelado"] = True
     entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1)]
     assert _buscar() == []
     assert entorno["consultas"] == []
@@ -265,6 +446,7 @@ def test_lance_caido_devuelve_lo_de_cmr(entorno):
 
 
 def test_modis_usa_version_nrt(entorno):
+    entorno["congelado"] = True
     entorno["lance"] = [dict(ITEM_MYD, start=DIA + " 08:30:00")]
     res = _buscar("MODIS_AQUA_L1B")
     assert entorno["consultas"] == [("MYD021KM", DIA)]
@@ -310,7 +492,8 @@ def test_tolerancia_recupera_un_borde_a_60_km():
 
 
 def test_search_granules_descarta_lo_lejano(entorno):
-    entorno["lance"] = [dict(item("VJ202MOD_NRT", "04:12", 1), **G_0412),
+    entorno["congelado"] = True
+    entorno["lance"] =[dict(item("VJ202MOD_NRT", "04:12", 1), **G_0412),
                         dict(item("VJ202MOD_NRT", "05:54", 2), **G_0554)]
     res = _buscar("VIIRS_NOAA21_MOD_L1B")
     assert [g["umm"]["GranuleUR"] for g in res] == ["LANCEMODIS:2"]

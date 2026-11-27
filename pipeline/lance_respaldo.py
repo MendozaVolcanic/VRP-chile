@@ -13,7 +13,11 @@
 # Limitaciones  : La interseccion de la caja la calcula LANCE con su poligono (GRing), no con el de CMR: en el
 #                 borde de una pasada puede incluir o excluir un granulo distinto; uno de mas se procesa y no
 #                 cubre el volcan, uno de menos se pierde sólo cuando CMR ya fallo. LANCE retiene ~7 a 14 dias.
-#                 La API de LANCE cambia mas que CMR y advierte bloqueo de IP por pedidos excesivos.
+#                 La API de LANCE cambia mas que CMR y advierte bloqueo de IP por pedidos excesivos. Con el respaldo
+#                 activo, en VIIRS 750 (sin corte de 5 km al centro) un granulo de borde que CMR habria excluido puede
+#                 dejar un record «escena_invalida» de 0 MW (pasada no medida) que con CMR no existiria; y el dia de
+#                 un granulo que cruza la medianoche puede no coincidir con el de CMR (verificador limpio S203, R-3
+#                 y R-7). Cuantos casos: SIN MEDIR; solo ocurre mientras CMR esta caido.
 # Refs/datos    : D:\vrp-trabajo\temporales\s202\latencia_lance\INFORME.md (caida del 26-nov);
 #                 D:\vrp-trabajo\temporales\s203\cmr27\lance_vs_cmr_331.txt (27-nov); Coppola et al. 2019
 #                 (MIROVA lee LANCE). Plan: docs/superpowers/plans/2026-11-27-respaldo-lance.md.
@@ -27,6 +31,7 @@ sin pasadas que LANCE ya tenía. LANCE tiene su propio buscador espacial, indepe
 con el mismo número (`fileId`) que CMR usa en `GranuleUR` (`LANCEMODIS:<fileId>`), así que el gránulo que se arma aquí
 es el mismo archivo, con el mismo enlace, que el que habría dado CMR. Sin cambio científico.
 """
+import http.client
 import json
 import math
 import urllib.error
@@ -36,11 +41,17 @@ from datetime import datetime
 
 HOSTS = ("nrt3.modaps.eosdis.nasa.gov", "nrt4.modaps.eosdis.nasa.gov")
 URL_SALUD_CMR = "https://cmr.earthdata.nasa.gov/search/health"
-TIMEOUT_S = 60
+# POR QUÉ 30 s y un cortacircuito por proceso (verificador limpio S203, R-2): con CMR caído cada búsqueda pasa por
+# aquí; si LANCE también está colgado, 60 s por host y por búsqueda sumaban hasta 96 min en un job que tiene 50. Ahora
+# la primera vez que nrt3 y nrt4 fallan juntos, LANCE queda marcado caído para el resto del proceso: el peor caso es
+# una espera de 2 × 30 s por proceso.
+TIMEOUT_S = 30
+_CAIDO = False
+_ERRORES_RED = (OSError, ValueError, http.client.HTTPException)   # URLError y HTTPError son OSError; IncompleteRead no
 
 
 class LanceNoResponde(RuntimeError):
-    """Ni nrt3 ni nrt4 respondieron la consulta."""
+    """Ni nrt3 ni nrt4 respondieron la consulta (o LANCE ya se marcó caído en este proceso)."""
 
 
 def _abrir(url, timeout=None):
@@ -62,7 +73,11 @@ def conjunto(producto: str) -> str:
 
 def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
     """Gránulos de `short_name` del día `fecha` (AAAA-MM-DD) que tocan `bbox` (oeste, sur, este, norte), según el
-    buscador de LANCE. Prueba nrt3 y, si no responde, nrt4; si ninguno responde, LanceNoResponde."""
+    buscador de LANCE. Prueba nrt3 y, si no responde, nrt4; si ninguno responde, LanceNoResponde y LANCE queda
+    marcado caído para el resto del proceso."""
+    global _CAIDO
+    if _CAIDO:
+        raise LanceNoResponde("LANCE marcado caído en este proceso (cortacircuito)")
     dia = datetime.strptime(fecha, "%Y-%m-%d")
     w, s, e, n = bbox
     region = "[BBOX]W%s N%s E%s S%s" % (w, n, e, s)
@@ -74,11 +89,12 @@ def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
         try:
             with _abrir(url, timeout=TIMEOUT_S) as r:
                 datos = json.load(r)
-        except (OSError, ValueError) as ex:   # URLError y HTTPError son OSError; JSON roto es ValueError
+        except _ERRORES_RED as ex:
             errores.append("%s: %s" % (host, ex))
             continue
         return [c for c in datos.get("content", [])
                 if c.get("resourceType") == "File" and c.get("products") == short_name]
+    _CAIDO = True
     raise LanceNoResponde("; ".join(errores))
 
 
@@ -129,12 +145,18 @@ def toca_caja(item: dict, lat: float, lon: float, media_km: float) -> bool:
 
 def a_granulo(item: dict, short_name: str, version: str):
     """Convierte una respuesta de LANCE en un DataGranule con lo que el flujo lee de un gránulo de CMR: GranuleUR,
-    inicio, colección y el enlace GET DATA (allData/<conjunto>/<producto>/<año>/<día>/<archivo>)."""
+    inicio, colección y el enlace GET DATA (allData/<conjunto>/<producto>/<año>/<día>/<archivo>).
+    POR QUÉ el host del propio ítem (verificador limpio S203, R-1): nrt3 y nrt4 procesan cada pasada por separado y el
+    archivo lleva otra marca de producción (MYD03 27-nov 08:30: ...100627 en nrt3, ...095452 en nrt4); el nombre que
+    dio nrt4 sólo existe en nrt4 (allData de nrt4 lo lista con ese mismo enlace, comprobado el 2026-11-27)."""
     from earthaccess.results import DataGranule
     inicio = datetime.strptime(item["start"], "%Y-%m-%d %H:%M:%S")
+    host = urllib.parse.urlparse(item["downloadsLink"]).netloc
+    if host not in HOSTS:
+        raise ValueError("enlace de LANCE con un host inesperado: %r" % item["downloadsLink"])
     archivo = item["downloadsLink"].rsplit("/", 1)[1]
     url = "https://%s/api/v2/content/archives/allData/%s/%s/%d/%03d/%s" % (
-        HOSTS[0], conjunto(short_name), short_name, inicio.year, inicio.timetuple().tm_yday, archivo)
+        host, conjunto(short_name), short_name, inicio.year, inicio.timetuple().tm_yday, archivo)
     ur = "LANCEMODIS:%s" % item["fileId"]
     return DataGranule({
         "meta": {"concept-id": "LANCE-" + ur, "provider-id": "LANCEMODIS", "vrp-origen": "lance"},
@@ -147,12 +169,55 @@ def a_granulo(item: dict, short_name: str, version: str):
 
 
 _CONGELADO = None
+_INCOMPLETO: dict = {}
+URL_CMR_GRANULOS = "https://cmr.earthdata.nasa.gov/search/granules.json"
+# POR QUÉ un segundo disparador (S203, medido el 27-nov a las 13:36 UTC): cuando el indexador de CMR vuelve, `health` dice
+# sano y CMR cataloga las pasadas NUEVAS, pero las del tiempo que estuvo caído no vuelven (MYD021KM del día 331: 151
+# archivos en LANCE, 84 en CMR; MOD021KM sin nada después de las 06:15). Mirar sólo la salud perdería justo ese hueco.
+# Se compara, por producto y día, cuántos archivos tiene la carpeta de LANCE con cuántos lista CMR. En días sanos CMR
+# lista uno MÁS que la carpeta (el gránulo del borde del día anterior) en los ocho productos medidos (2026-11-21 y 23,
+# D:\vrp-trabajo\temporales\s203\cmr27\lance_vs_cmr_325.txt y _327.txt); con CMR sano el gránulo llega al catálogo
+# segundos después que a la carpeta (S202). Tres de más en LANCE ya no es latencia: es un hueco del catálogo.
+UMBRAL_HUECO = 3
 
 
 def reiniciar() -> None:
-    """Olvida la salud de CMR (pruebas y procesos largos)."""
-    global _CONGELADO
+    """Olvida la salud de CMR, los huecos medidos y el cortacircuito de LANCE (pruebas y procesos largos)."""
+    global _CONGELADO, _CAIDO
     _CONGELADO = None
+    _CAIDO = False
+    _INCOMPLETO.clear()
+
+
+def catalogo_incompleto(short_name: str, version: str, fecha: str) -> bool:
+    """True si la carpeta del día en LANCE tiene al menos UMBRAL_HUECO archivos más que los gránulos que CMR lista para
+    ese producto y día. Una medición por producto y día por proceso. Sin respuesta legible de alguno de los dos, False
+    (la falla de búsqueda de CMR ya dispara el respaldo sola)."""
+    clave = (short_name, version, fecha)
+    if clave in _INCOMPLETO:
+        return _INCOMPLETO[clave]
+    dia = datetime.strptime(fecha, "%Y-%m-%d")
+    resultado = False
+    try:
+        q = urllib.parse.urlencode({"short_name": short_name, "version": version, "page_size": 0,
+                                    "temporal": "%sT00:00:00Z,%sT23:59:59Z" % (fecha, fecha)})
+        with _abrir(URL_CMR_GRANULOS + "?" + q, timeout=TIMEOUT_S) as r:
+            n_cmr = int(r.headers.get("CMR-Hits"))
+        n_lance = None
+        for host in HOSTS:
+            url = "https://%s/api/v2/content/details/allData/%s/%s/%d/%03d" % (
+                host, conjunto(short_name), short_name, dia.year, dia.timetuple().tm_yday)
+            try:
+                with _abrir(url, timeout=TIMEOUT_S) as r:
+                    n_lance = sum(1 for c in json.load(r).get("content", []) if c.get("resourceType") == "File")
+                break
+            except _ERRORES_RED:
+                continue
+        resultado = n_lance is not None and n_lance - n_cmr >= UMBRAL_HUECO
+    except (_ERRORES_RED + (TypeError, KeyError)):
+        resultado = False
+    _INCOMPLETO[clave] = resultado
+    return resultado
 
 
 def catalogo_congelado() -> bool:
