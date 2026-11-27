@@ -17,7 +17,10 @@
 #                 activo, en VIIRS 750 (sin corte de 5 km al centro) un granulo de borde que CMR habria excluido puede
 #                 dejar un record «escena_invalida» de 0 MW (pasada no medida) que con CMR no existiria; y el dia de
 #                 un granulo que cruza la medianoche puede no coincidir con el de CMR (verificador limpio S203, R-3
-#                 y R-7). Cuantos casos: SIN MEDIR; solo ocurre mientras CMR esta caido.
+#                 y R-7). Cuantos casos: SIN MEDIR; solo ocurre cuando el respaldo dispara para ese producto y dia
+#                 (CMR fallo, esta congelado o le faltan archivos de ese producto y dia), aunque el hueco este en
+#                 horas que no tocan al volcan. Con CMR sano y completo agrega dos pedidos (CMR-Hits y listado de
+#                 la carpeta de LANCE) por producto y dia, solo hoy y ayer, una vez por proceso.
 # Refs/datos    : D:\vrp-trabajo\temporales\s202\latencia_lance\INFORME.md (caida del 26-nov);
 #                 D:\vrp-trabajo\temporales\s203\cmr27\lance_vs_cmr_331.txt (27-nov); Coppola et al. 2019
 #                 (MIROVA lee LANCE). Plan: docs/superpowers/plans/2026-11-27-respaldo-lance.md.
@@ -34,6 +37,7 @@ es el mismo archivo, con el mismo enlace, que el que habría dado CMR. Sin cambi
 import http.client
 import json
 import math
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -179,6 +183,10 @@ URL_CMR_GRANULOS = "https://cmr.earthdata.nasa.gov/search/granules.json"
 # D:\vrp-trabajo\temporales\s203\cmr27\lance_vs_cmr_325.txt y _327.txt); con CMR sano el gránulo llega al catálogo
 # segundos después que a la carpeta (S202). Tres de más en LANCE ya no es latencia: es un hueco del catálogo.
 UMBRAL_HUECO = 3
+# Sólo cuentan los archivos de la carpeta con al menos EDAD_MIN_S de antigüedad (campo mtime): con CMR sano el gránulo
+# llega al catálogo segundos después que a la carpeta (S202), así que uno más nuevo puede estar en tránsito y no es
+# hueco (verificador limpio S203, segunda pasada, mecanismo (a): día en curso).
+EDAD_MIN_S = 15 * 60
 
 
 def reiniciar() -> None:
@@ -189,14 +197,20 @@ def reiniciar() -> None:
     _INCOMPLETO.clear()
 
 
-def catalogo_incompleto(short_name: str, version: str, fecha: str) -> bool:
-    """True si la carpeta del día en LANCE tiene al menos UMBRAL_HUECO archivos más que los gránulos que CMR lista para
-    ese producto y día. Una medición por producto y día por proceso. Sin respuesta legible de alguno de los dos, False
-    (la falla de búsqueda de CMR ya dispara el respaldo sola)."""
+def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float | None = None) -> bool:
+    """True si la carpeta del día en LANCE tiene al menos UMBRAL_HUECO archivos (de más de EDAD_MIN_S) más que los
+    gránulos que CMR lista para ese producto y día. Una medición por producto y día por proceso. Sin respuesta legible
+    de alguno de los dos, False (la falla de búsqueda de CMR ya dispara el respaldo sola). Respeta el cortacircuito de
+    LANCE y lo enciende si nrt3 y nrt4 no responden el listado (verificador limpio S203, segunda pasada: sin esto, con
+    CMR sano y LANCE colgado un job esperaba hasta 96 min)."""
+    global _CAIDO
+    if _CAIDO:
+        return False
     clave = (short_name, version, fecha)
     if clave in _INCOMPLETO:
         return _INCOMPLETO[clave]
     dia = datetime.strptime(fecha, "%Y-%m-%d")
+    limite = (time.time() if ahora is None else ahora) - EDAD_MIN_S
     resultado = False
     try:
         q = urllib.parse.urlencode({"short_name": short_name, "version": version, "page_size": 0,
@@ -209,10 +223,13 @@ def catalogo_incompleto(short_name: str, version: str, fecha: str) -> bool:
                 host, conjunto(short_name), short_name, dia.year, dia.timetuple().tm_yday)
             try:
                 with _abrir(url, timeout=TIMEOUT_S) as r:
-                    n_lance = sum(1 for c in json.load(r).get("content", []) if c.get("resourceType") == "File")
+                    n_lance = sum(1 for c in json.load(r).get("content", [])
+                                  if c.get("resourceType") == "File" and float(c.get("mtime", 0)) <= limite)
                 break
             except _ERRORES_RED:
                 continue
+        if n_lance is None:
+            _CAIDO = True
         resultado = n_lance is not None and n_lance - n_cmr >= UMBRAL_HUECO
     except (_ERRORES_RED + (TypeError, KeyError)):
         resultado = False

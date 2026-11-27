@@ -257,6 +257,55 @@ def test_catalogo_incompleto_usa_el_espejo_y_sin_red_es_falso(monkeypatch):
     assert L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27") is False
 
 
+def test_catalogo_incompleto_no_cuenta_archivos_recien_llegados(monkeypatch):
+    """Un archivo de menos de 15 min puede estar en tránsito a CMR: no es hueco (día en curso)."""
+    ahora = 1_800_000_000.0
+
+    def falso(url, timeout=None):
+        if "cmr.earthdata" in url:
+            return _RespH(b"{}", {"CMR-Hits": "84"})
+        viejos = [{"resourceType": "File", "mtime": ahora - 3600} for _ in range(84)]
+        nuevos = [{"resourceType": "File", "mtime": ahora - 60} for _ in range(5)]
+        return _RespH(json.dumps({"content": viejos + nuevos}).encode())
+
+    monkeypatch.setattr(L, "_abrir", falso)
+    L.reiniciar()
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27", ahora=ahora) is False
+    L.reiniciar()
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27", ahora=ahora + L.EDAD_MIN_S) is True   # control
+
+
+def test_catalogo_incompleto_respeta_y_enciende_el_cortacircuito(monkeypatch):
+    llamadas = []
+
+    def falso(url, timeout=None):
+        llamadas.append(url)
+        if "cmr.earthdata" in url:
+            return _RespH(b"{}", {"CMR-Hits": "84"})
+        raise OSError("LANCE colgado")
+
+    monkeypatch.setattr(L, "_abrir", falso)
+    L.reiniciar()
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27") is False
+    n = len(llamadas)
+    assert n == 3                                                         # CMR-Hits, nrt3, nrt4
+    assert L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27") is False
+    assert len(llamadas) == n                                             # cortacircuito: ni CMR ni LANCE otra vez
+    estado, val = resultado(lambda: L.consultar("VJ102IMG_NRT", (-68, -24, -67, -23), "2026-11-27"))
+    assert estado == "error" and isinstance(val, L.LanceNoResponde) and len(llamadas) == n
+    L.reiniciar()
+
+
+def test_hueco_solo_se_mide_hoy_y_ayer(entorno, monkeypatch):
+    medidos = []
+    monkeypatch.setattr(L, "catalogo_incompleto", lambda s, v, f: medidos.append(f) or True)
+    entorno["lance"] = [item("VJ102IMG_NRT", "05:06", 1)]
+    for atras in (0, fetch.LANCE_DIAS_HUECO, fetch.LANCE_DIAS_HUECO + 1):
+        _buscar(dia=HOY - timedelta(days=atras))
+    assert medidos == [(HOY - timedelta(days=a)).strftime("%Y-%m-%d") for a in (0, fetch.LANCE_DIAS_HUECO)]
+    assert len(entorno["consultas"]) == 2                                 # el día viejo sin falla ni congelado no consulta
+
+
 def test_cmr_sano_pero_incompleto_toma_lance(entorno):
     """27-nov 13:36 UTC: health sano, pero CMR sin la pasada 06:48 que LANCE tiene."""
     entorno["incompleto"] = True

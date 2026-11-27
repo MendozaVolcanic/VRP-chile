@@ -1030,11 +1030,12 @@ def _buscar_dia_con_reintento(product_key, short_name, ver, bbox, date_str):
 # y mismo token que daría CMR, sin cambio científico. Sólo para productos NRT de los últimos LANCE_DIAS días (lo que
 # LANCE retiene) y sólo cuando la búsqueda en CMR falló (error, timeout o cortacircuito), CMR dice estar congelado
 # (`search/health`, una consulta por proceso) o al catálogo le faltan archivos de ese producto y día (la carpeta de LANCE
-# tiene 3 o más que los que CMR lista; una medición por producto y día por proceso): al volver, el indexador cataloga
+# tiene 3 o más que los que CMR lista; una medición por producto y día por proceso, sólo hoy y ayer): al volver, el indexador cataloga
 # las pasadas nuevas pero no las del tiempo caído (27-nov, 13:36 UTC). Con CMR sano y completo no se busca en LANCE,
 # ni siquiera si CMR responde vacío (el día en curso a las 00 UTC no tiene pasadas; verificador limpio S203, R-3). Nada
 # de lo que pase en LANCE puede quitar lo que CMR ya trajo. Interruptor: VRP_LANCE_RESPALDO=0.
 LANCE_DIAS = 10
+LANCE_DIAS_HUECO = 1
 _RESPALDOS_LANCE: list = []
 _LANCE_AVISADO = False
 
@@ -1127,7 +1128,11 @@ def _completar_con_lance(product_key, lat, lon, radius_km, date, nrt, res, fallo
     from pipeline import lance_respaldo
     fecha = date.strftime("%Y-%m-%d")
     congelado = lance_respaldo.catalogo_congelado()
-    if not fallo and not congelado and not lance_respaldo.catalogo_incompleto(*clave_nrt, fecha):
+    # El hueco se mide sólo para hoy y ayer (LANCE_DIAS_HUECO): desde el tercer día el producto estándar ya cubre el día
+    # (_intentos lo pide primero) y cada medición son dos pedidos por producto y día en cada job (verificador limpio S203,
+    # segunda pasada: con 10 días eran hasta 96 listados de LANCE por job con CMR sano).
+    reciente = (datetime.utcnow().date() - date.replace(tzinfo=None).date()).days <= LANCE_DIAS_HUECO
+    if not fallo and not congelado and not (reciente and lance_respaldo.catalogo_incompleto(*clave_nrt, fecha)):
         return [], congelado   # CMR sano y completo para el producto y día: su respuesta, vacía o no, es la que vale
     delta = radius_km / 111.0
     bbox = (lon - delta, lat - delta, lon + delta, lat + delta)
