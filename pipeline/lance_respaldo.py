@@ -197,6 +197,15 @@ def reiniciar() -> None:
     _INCOMPLETO.clear()
 
 
+def _antiguo(c: dict, limite: float) -> bool:
+    """True si el archivo es anterior a `limite`. Un mtime ausente o ilegible cuenta como antiguo: un dato raro de un
+    archivo no puede tomarse como LANCE caído y apagar el respaldo (verificador limpio S203, tercera pasada)."""
+    try:
+        return float(c.get("mtime", 0)) <= limite
+    except (TypeError, ValueError):
+        return True
+
+
 def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float | None = None) -> bool:
     """True si la carpeta del día en LANCE tiene al menos UMBRAL_HUECO archivos (de más de EDAD_MIN_S) más que los
     gránulos que CMR lista para ese producto y día. Una medición por producto y día por proceso. Sin respuesta legible
@@ -224,7 +233,7 @@ def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float 
             try:
                 with _abrir(url, timeout=TIMEOUT_S) as r:
                     n_lance = sum(1 for c in json.load(r).get("content", [])
-                                  if c.get("resourceType") == "File" and float(c.get("mtime", 0)) <= limite)
+                                  if c.get("resourceType") == "File" and _antiguo(c, limite))
                 break
             except _ERRORES_RED:
                 continue

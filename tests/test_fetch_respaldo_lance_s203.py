@@ -275,6 +275,20 @@ def test_catalogo_incompleto_no_cuenta_archivos_recien_llegados(monkeypatch):
     assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27", ahora=ahora + L.EDAD_MIN_S) is True   # control
 
 
+def test_mtime_ilegible_no_apaga_el_respaldo(monkeypatch):
+    def falso(url, timeout=None):
+        if "cmr.earthdata" in url:
+            return _RespH(b"{}", {"CMR-Hits": "84"})
+        cont = [{"resourceType": "File", "mtime": "raro"}] + [{"resourceType": "File", "mtime": 1} for _ in range(90)]
+        return _RespH(json.dumps({"content": cont}).encode())
+
+    monkeypatch.setattr(L, "_abrir", falso)
+    L.reiniciar()
+    assert L.catalogo_incompleto("MYD021KM", "6.1NRT", "2026-11-27") is True
+    assert L._CAIDO is False
+    L.reiniciar()
+
+
 def test_catalogo_incompleto_respeta_y_enciende_el_cortacircuito(monkeypatch):
     llamadas = []
 
