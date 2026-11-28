@@ -3844,7 +3844,7 @@ function renderDetail() {
     const lbl = document.createTextNode(label);
     item.append(dot, lbl); mapLeg.appendChild(item);
   });
-  mapHdr.append(mapTitle, mapLeg);
+  const CENTRO_REF_SVG = '<svg width="22" height="22" viewBox="0 0 22 22" style="display:block"><g fill="none" stroke-linecap="round"><g stroke="#000" stroke-width="4" opacity=".75"><circle cx="11" cy="11" r="6.5"/><path d="M11 1v5M11 16v5M1 11h5M16 11h5"/></g><g stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="M11 1v5M11 16v5M1 11h5M16 11h5"/></g></g></svg>'; { const c = el("div", "map-legend-item"); c.innerHTML = CENTRO_REF_SVG.replace('width="22" height="22"', 'width="14" height="14"') + "Centro de referencia (cráter)"; mapLeg.prepend(c); } mapHdr.append(mapTitle, mapLeg);   // S204 (Nicolás, 2026-11-28): el centro de referencia es una mira blanca sin relleno; antes era un punto naranjo casi igual al de una anomalía MODIS y confundía
   mapaHost.appendChild(mapHdr);   // S180: antes de la tabla
   // S180: qué pasada muestra la capa «Píxeles medidos» (la llena el mapa al dibujarse y al tocar una fila).
   const notaMed = el("div", "pixeles-nota");
@@ -3978,11 +3978,11 @@ function renderDetail() {
     const capasCtl = L.control.layers(null, capasMapa, { collapsed: true, position: "topright" }).addTo(map);
     if (aguaLayer) capasCtl.addOverlay(aguaLayer, "Cuerpos de agua (JRC, 50 % o más)");   // S193
 
-    // Volcano center marker
-    L.circleMarker([v.lat, v.lon], {
-      radius: 6, color: "#fff", weight: 2, fillColor: "#ff5722",
-      fillOpacity: 0.9,
-    }).addTo(map).bindPopup(`<b>${v.display}</b><br>Centro referencia`);
+    // Volcano center marker. S204 (Nicolás): mira en cruz sin relleno (CENTRO_REF_SVG, junto a la leyenda), sobre las anomalías.
+    L.marker([v.lat, v.lon], {
+      icon: L.divIcon({ className: "centro-ref", html: CENTRO_REF_SVG, iconSize: [22, 22], iconAnchor: [11, 11] }),
+      zIndexOffset: 1000, title: "Centro de referencia (cráter)", keyboard: false,
+    }).addTo(map).bindPopup(`<b>${v.display}</b><br>Centro de referencia (cráter)`);
 
     // Vent marker (if exists)
     if (v.vent_lat && v.vent_lon) {
