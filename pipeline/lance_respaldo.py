@@ -7,6 +7,8 @@
 #                 por producto, dia y caja del volcan, y convierte cada respuesta en un granulo con la misma
 #                 forma y el mismo enlace de descarga que da CMR para ese archivo. Revisa una vez por proceso
 #                 la salud de CMR (search/health). Quien decide cuando usarlo es fetch.search_granules.
+#                 Gasta a lo mas PRESUPUESTO_S (10 min) de red por proceso y salta el espejo que ya fallo; al
+#                 agotarse, el proceso sigue sólo con CMR (S204, ronda 6 de Codex: R6FL-118, R6FL-V201, R6FL-102).
 # Modelo/método : Reglas deterministicas. Sin aprendizaje automatico.
 # Datos entrada : API de LANCE /api/v2/content/details (anonima) y CMR /search/health. SIN datos personales.
 # Variables     : producto NRT, dia UTC, caja de busqueda (la misma que se le pide a CMR).
@@ -52,6 +54,39 @@ URL_SALUD_CMR = "https://cmr.earthdata.nasa.gov/search/health"
 TIMEOUT_S = 30
 _CAIDO = False
 _ERRORES_RED = (OSError, ValueError, http.client.HTTPException)   # URLError y HTTPError son OSError; IncompleteRead no
+# POR QUÉ un presupuesto de tiempo por proceso (ronda 6 de Codex, R6FL-118 y R6FL-102, verificados por un Claude de
+# contexto limpio en gravedad 3): el cortacircuito sólo salta si nrt3 y nrt4 fallan juntos, y LANCE puede responder
+# lento sin fallar (con respuestas de 29 s y CMR caído en 8 fechas por 12 productos, 46 min sólo de LANCE, en un job de
+# 50). Toda llamada de red de este módulo gasta de un mismo presupuesto; al agotarse, LANCE queda marcado caído y el
+# resto del proceso usa sólo CMR, como antes del respaldo. 10 min: el 27-nov (run 46044996773) el respaldo de Láscar
+# tardó unos 40 s en 12 productos, así que un día normal usa menos de una décima.
+PRESUPUESTO_S = 600
+_GASTADO = 0.0
+_reloj = time.monotonic
+# POR QUÉ se salta el host que falló (R6FL-V201): con nrt3 colgado y nrt4 sano el cortacircuito no salta y cada consulta
+# pagaba 30 s en nrt3 antes de ir a nrt4 (48 min). El primer host que falla pasa al final de la lista para el resto
+# del proceso.
+_ORDEN = list(HOSTS)
+
+
+def _con_presupuesto(url, timeout):
+    """Abre `url` gastando del presupuesto del proceso; si ya se agotó, enciende el cortacircuito y no sale a la red."""
+    global _GASTADO, _CAIDO
+    if _GASTADO >= PRESUPUESTO_S:
+        _CAIDO = True
+        raise LanceNoResponde("presupuesto de %d s del respaldo agotado en este proceso" % PRESUPUESTO_S)
+    t0 = _reloj()
+    try:
+        return _abrir(url, timeout=timeout)
+    finally:
+        _GASTADO += _reloj() - t0
+
+
+def _fallo_host(host):
+    """El host que no respondió pasa al final del orden para el resto del proceso."""
+    if host in _ORDEN and _ORDEN[-1] != host:
+        _ORDEN.remove(host)
+        _ORDEN.append(host)
 
 
 class LanceNoResponde(RuntimeError):
@@ -88,13 +123,14 @@ def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
     query = "products=%s&temporalRanges=%d-%03d&regions=%s" % (
         short_name, dia.year, dia.timetuple().tm_yday, urllib.parse.quote(region))
     errores = []
-    for host in HOSTS:
+    for host in list(_ORDEN):
         url = "https://%s/api/v2/content/details?%s" % (host, query)
         try:
-            with _abrir(url, timeout=TIMEOUT_S) as r:
+            with _con_presupuesto(url, TIMEOUT_S) as r:
                 datos = json.load(r)
         except _ERRORES_RED as ex:
             errores.append("%s: %s" % (host, ex))
+            _fallo_host(host)
             continue
         return [c for c in datos.get("content", [])
                 if c.get("resourceType") == "File" and c.get("products") == short_name]
@@ -191,9 +227,11 @@ EDAD_MIN_S = 15 * 60
 
 def reiniciar() -> None:
     """Olvida la salud de CMR, los huecos medidos y el cortacircuito de LANCE (pruebas y procesos largos)."""
-    global _CONGELADO, _CAIDO
+    global _CONGELADO, _CAIDO, _GASTADO
     _CONGELADO = None
     _CAIDO = False
+    _GASTADO = 0.0
+    _ORDEN[:] = list(HOSTS)
     _INCOMPLETO.clear()
 
 
@@ -224,23 +262,24 @@ def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float 
     try:
         q = urllib.parse.urlencode({"short_name": short_name, "version": version, "page_size": 0,
                                     "temporal": "%sT00:00:00Z,%sT23:59:59Z" % (fecha, fecha)})
-        with _abrir(URL_CMR_GRANULOS + "?" + q, timeout=TIMEOUT_S) as r:
+        with _con_presupuesto(URL_CMR_GRANULOS + "?" + q, TIMEOUT_S) as r:
             n_cmr = int(r.headers.get("CMR-Hits"))
         n_lance = None
-        for host in HOSTS:
+        for host in list(_ORDEN):
             url = "https://%s/api/v2/content/details/allData/%s/%s/%d/%03d" % (
                 host, conjunto(short_name), short_name, dia.year, dia.timetuple().tm_yday)
             try:
-                with _abrir(url, timeout=TIMEOUT_S) as r:
+                with _con_presupuesto(url, TIMEOUT_S) as r:
                     n_lance = sum(1 for c in json.load(r).get("content", [])
                                   if c.get("resourceType") == "File" and _antiguo(c, limite))
                 break
             except _ERRORES_RED:
+                _fallo_host(host)
                 continue
         if n_lance is None:
             _CAIDO = True
         resultado = n_lance is not None and n_lance - n_cmr >= UMBRAL_HUECO
-    except (_ERRORES_RED + (TypeError, KeyError)):
+    except (_ERRORES_RED + (TypeError, KeyError, LanceNoResponde)):   # LanceNoResponde: presupuesto agotado
         resultado = False
     _INCOMPLETO[clave] = resultado
     return resultado

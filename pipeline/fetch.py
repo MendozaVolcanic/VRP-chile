@@ -158,7 +158,10 @@ try:
     import requests as _requests
     _NASA_HOSTS = ("urs.earthdata.nasa.gov", "cmr.earthdata.nasa.gov",
                    "data.lpdaac.earthdatacloud.nasa.gov", "ladsweb.modaps.eosdis.nasa.gov",
-                   "nrt3.modaps.eosdis.nasa.gov")
+                   "nrt3.modaps.eosdis.nasa.gov",
+                   # S204 (ronda 6 de Codex, R6FL-108, verificado en gravedad 3): nrt4 es el espejo de nrt3 desde el
+                   # respaldo LANCE (#1143); sin esta línea sus descargas iban sin tiempo de espera.
+                   "nrt4.modaps.eosdis.nasa.gov")
     _MIN_TIMEOUT = 60.0
     _orig_session_request = _requests.Session.request
     def _request_with_nasa_timeout(self, method, url, **kwargs):
