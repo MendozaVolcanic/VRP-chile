@@ -11,6 +11,7 @@ CMR, como antes de #1143), saltar el host que ya falló, y nrt4 en la lista de h
 """
 import io
 import json
+from datetime import date
 
 import pytest
 
@@ -43,20 +44,28 @@ class _Reloj:
 
 
 @pytest.fixture(autouse=True)
-def limpio():
+def limpio(monkeypatch):
+    """«Hoy» fijo en 2026-11-27: las pruebas no dependen del día en que corren (lección R6FL-116)."""
+    monkeypatch.setattr(L, "_hoy", lambda: date(2026, 11, 27), raising=False)
     L.reiniciar()
     yield
     L.reiniciar()
 
 
-def red_lenta(reloj, paso, nrt3_colgado=False, llamadas=None):
+def red_lenta(reloj, paso, nrt3_colgado=False, llamadas=None, nrt3_error_rapido=0):
+    """nrt3_colgado: nrt3 agota su tiempo de espera; nrt3_error_rapido: nrt3 falla al tiro las primeras N veces."""
+    cuenta = {"rapido": 0}
+
     def falso(url, timeout=None):
         host = url.split("/")[2]
         if llamadas is not None:
             llamadas.append(host)
         if nrt3_colgado and host.startswith("nrt3"):
             reloj.t += L.TIMEOUT_S
-            raise OSError("timed out")
+            raise TimeoutError("timed out")
+        if host.startswith("nrt3") and cuenta["rapido"] < nrt3_error_rapido:
+            cuenta["rapido"] += 1
+            raise OSError("404 pasajero")
         reloj.t += paso
         return _Resp(json.dumps({"content": [ITEM]}).encode())
     return falso
@@ -105,7 +114,7 @@ def test_conteo_de_cmr_y_carpeta_cuentan_en_el_presupuesto(monkeypatch):
     monkeypatch.setattr(L, "_abrir", red_lenta(reloj, 29.0))
     inicio = reloj.t
     for i in range(60):
-        L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-%02d" % (1 + i % 28), ahora=0)
+        L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27", ahora=0)
         L._INCOMPLETO.clear()
     assert reloj.t - inicio <= L.PRESUPUESTO_S + 3 * L.TIMEOUT_S
 
@@ -134,10 +143,66 @@ def test_reiniciar_devuelve_el_orden_y_el_presupuesto(monkeypatch):
     assert llamadas[0] == "nrt3.modaps.eosdis.nasa.gov"
 
 
+def test_dias_viejos_no_dejan_a_hoy_sin_respaldo(monkeypatch):
+    """I-1 del verificador del PR 1147: el NRT busca de lo más viejo a hoy; una caída larga no puede gastar en los días
+    viejos el tiempo de hoy."""
+    reloj = _Reloj()
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", red_lenta(reloj, 29.0))
+    viejos = [resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-2%d" % (i % 6)))[0] for i in range(96)]
+    assert viejos[-1] == "error"   # la bolsa de los días viejos se agotó
+    hoy = [resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, d))[0] for d in ("2026-11-26", "2026-11-27")]
+    assert hoy == ["ok", "ok"]
+
+
+def test_error_rapido_no_manda_el_host_al_final(monkeypatch):
+    """I-2 del verificador del PR 1147: un 404 pasajero de nrt3 no deja al proceso en nrt4 para siempre."""
+    reloj = _Reloj()
+    llamadas = []
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", red_lenta(reloj, 1.0, llamadas=llamadas, nrt3_error_rapido=1))
+    resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    llamadas.clear()
+    resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    assert llamadas == ["nrt3.modaps.eosdis.nasa.gov"]
+
+
+def test_el_tiempo_de_un_error_tambien_gasta(monkeypatch):
+    """Los 30 s que se pierden en un nrt3 colgado cuentan en la bolsa, no sólo las respuestas buenas."""
+    reloj = _Reloj()
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", red_lenta(reloj, 1.0, nrt3_colgado=True))
+    resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    assert L._GASTADO["reciente"] >= L.TIMEOUT_S + 1.0
+
+
+def test_el_conteo_tambien_salta_el_host_colgado(monkeypatch):
+    """Si nrt3 se cuelga en el listado de la carpeta, la consulta siguiente parte por nrt4."""
+    reloj = _Reloj()
+    llamadas = []
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", red_lenta(reloj, 1.0, nrt3_colgado=True, llamadas=llamadas))
+    L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27", ahora=0)
+    llamadas.clear()
+    resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    assert llamadas == ["nrt4.modaps.eosdis.nasa.gov"]
+
+
+def test_salud_de_cmr_gasta_y_respeta_la_bolsa(monkeypatch):
+    """catalogo_congelado pasa por el presupuesto: con la bolsa agotada no sale a la red y no rompe nada."""
+    llamadas = []
+    monkeypatch.setattr(L, "_abrir", lambda url, timeout=None: llamadas.append(url) or _Resp(b'{"indexer": {"ok?": false}}'))
+    L._GASTADO["reciente"] = L.PRESUPUESTO_S
+    assert L.catalogo_congelado() is False and llamadas == []
+    L.reiniciar()
+    assert L.catalogo_congelado() is True and len(llamadas) == 1
+
+
 def test_presupuesto_holgado_para_un_dia_normal():
-    """El 27-nov (run 46044996773) el respaldo de Láscar tardó unos 40 s en 12 productos: el presupuesto no puede
-    cortar un día normal."""
-    assert L.PRESUPUESTO_S >= 10 * 40
+    """Medido en las NRT del 27-nov 17:50 y 28-nov 01:07 (D:\\vrp-trabajo\\temporales\\s204\\salida_medir_tiempo_*.txt):
+    un volcán gastó a lo más 29 s por día. Hoy y ayer caben 10 veces; los seis días viejos, una caída entera."""
+    assert L.PRESUPUESTO_S >= 10 * 2 * 29
+    assert L.PRESUPUESTO_ANTIGUO_S >= 6 * 29
 
 
 def test_descarga_desde_nrt4_recibe_tiempo_de_espera(monkeypatch):
