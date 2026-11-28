@@ -94,6 +94,41 @@ def test_sin_presupuesto_el_hueco_no_se_da_por_completo(monkeypatch):
     assert resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))[0] == "error"
 
 
+def test_fetch_deja_escrito_el_presupuesto_agotado(monkeypatch):
+    """Verificador de #1151, I-2: la afirmación «queda escrito» se prueba en fetch.search_granules real, no sólo en el
+    módulo. Con CMR sano y vacío para hoy y la bolsa agotada: sin red, sin cortacircuito y una línea en el log."""
+    from datetime import datetime
+    from pipeline import fetch
+    hoy = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    monkeypatch.setattr(L, "_hoy", lambda: hoy.date())
+    monkeypatch.setattr(fetch, "_buscar_en_cmr", lambda *a, **k: [])
+    red, diag = [], []
+    monkeypatch.setattr(L, "_abrir", lambda url, timeout=None: red.append(url) or _Resp(b"{}"))
+    monkeypatch.setattr(fetch, "_diag", diag.append)
+    monkeypatch.delenv("VRP_LANCE_RESPALDO", raising=False)
+    fetch.limpiar_fallas()
+    fetch.reiniciar_respaldos_lance()
+    L._GASTADO["reciente"] = L.PRESUPUESTO_S
+    res = resultado(lambda: fetch.search_granules("VIIRS_NOAA20_L1B", -23.37, -67.73, 25, hoy))
+    fetch.limpiar_fallas()
+    fetch.reiniciar_respaldos_lance()
+    assert res == ("ok", [])
+    assert red == []
+    assert any("LANCE_RESPALDO_SIN_RESPUESTA" in m and "presupuesto" in m for m in diag), diag
+    assert L._CAIDO is False
+
+
+def test_bolsa_de_hoy_agotada_no_apaga_los_dias_viejos(monkeypatch):
+    """Verificador de #1151, I-2 (mutación M3): agotar una bolsa no enciende el cortacircuito de todo LANCE."""
+    monkeypatch.setattr(L, "_abrir", lambda url, timeout=None: _Resp(json.dumps({"content": [ITEM]}).encode()))
+    L._GASTADO["reciente"] = L.PRESUPUESTO_S
+    assert resultado(lambda: L.catalogo_incompleto("VJ102IMG_NRT", "2.1", "2026-11-27", ahora=0)) == ("ok", True)
+    assert resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))[0] == "error"
+    viejo = resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-20"))
+    assert viejo[0] == "ok" and len(viejo[1]) == 1
+    assert L._CAIDO is False
+
+
 def test_con_presupuesto_y_catalogo_completo_sigue_siendo_falso(monkeypatch):
     """El cambio de R6C-V201 no puede volver True un día sano: CMR 10, carpeta 10."""
     def falso(url, timeout=None):

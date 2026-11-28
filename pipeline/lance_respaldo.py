@@ -138,7 +138,11 @@ def conjunto(producto: str) -> str:
 def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
     """Gránulos de `short_name` del día `fecha` (AAAA-MM-DD) que tocan `bbox` (oeste, sur, este, norte), según el
     buscador de LANCE. Prueba nrt3 y, si no responde, nrt4; si ninguno responde, LanceNoResponde y LANCE queda
-    marcado caído para el resto del proceso."""
+    marcado caído para el resto del proceso. El espejo que se colgó pasa al final del orden; si el que quedó adelante
+    responde vacío, se le pregunta también al principal (R6C-108). Intercambio declarado (verificador de #1151, I-1): con
+    nrt3 colgado de verdad, cada vacío de nrt4 vuelve a pagar un tiempo de espera en nrt3; lo acota el presupuesto de la
+    bolsa y sólo pesa si más de la mitad de las consultas del día vienen vacías. Sin presupuesto, LanceNoResponde sin
+    salir a la red y sin encender el cortacircuito."""
     global _CAIDO
     if _CAIDO:
         raise LanceNoResponde("LANCE marcado caído en este proceso (cortacircuito)")
@@ -283,7 +287,8 @@ def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float 
     gránulos que CMR lista para ese producto y día. Una medición por producto y día por proceso. Sin respuesta legible
     de alguno de los dos, False (la falla de búsqueda de CMR ya dispara el respaldo sola). Respeta el cortacircuito de
     LANCE y lo enciende si nrt3 y nrt4 no responden el listado (verificador limpio S203, segunda pasada: sin esto, con
-    CMR sano y LANCE colgado un job esperaba hasta 96 min)."""
+    CMR sano y LANCE colgado un job esperaba hasta 96 min). Si la bolsa del día ya no tiene presupuesto, True sin medir
+    (R6C-V201): así el respaldo se intenta y su falta de presupuesto queda en el log en vez de callarse."""
     global _CAIDO
     if _CAIDO:
         return False
