@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-WT = "D:/vrp-trabajo/worktrees/s204-lance"
+WT = "D:/vrp-trabajo/worktrees/s204-lance2"
 LR = WT + "/pipeline/lance_respaldo.py"
 FE = WT + "/pipeline/fetch.py"
 MUT = [
@@ -19,6 +19,13 @@ MUT = [
     ("bolsa antigua chica", LR, "PRESUPUESTO_ANTIGUO_S = 300\n", "PRESUPUESTO_ANTIGUO_S = 30\n"),
     ("una sola bolsa", LR, ".days <= 1 else \"antiguo\"", ".days <= 1 else \"reciente\""),
     ("no salta el host caído", LR, "    if _se_colgo(ex) and host in _ORDEN and _ORDEN[-1] != host:\n", "    if False:\n"),
+    ("presupuesto enciende cortacircuito", LR, "    if _GASTADO[bolsa] >= tope:\n        raise LanceNoResponde(",
+     "    if _GASTADO[bolsa] >= tope:\n        globals()[\"_CAIDO\"] = True\n        raise LanceNoResponde("),
+    ("fetch no escribe el log", FE, "        _diag(f\"LANCE_RESPALDO_SIN_RESPUESTA [{product_key} {fecha}] {str(e)[:120]}\")\n",
+     "        pass\n"),
+    ("vacío del reemplazo es final", LR, "        if items or host == HOSTS[0]:\n", "        if True:\n"),
+    ("pregunta siempre al otro host", LR, "        if items or host == HOSTS[0]:\n", "        if items:\n"),
+    ("sin presupuesto dice completo", LR, "        resultado = True\n    except (_ERRORES_RED", "        resultado = False\n    except (_ERRORES_RED"),
     ("ignora el timeout envuelto", LR, " or isinstance(getattr(ex, \"reason\", None), TimeoutError)", ""),
     ("degrada con cualquier error", LR, "    return isinstance(ex, TimeoutError) or", "    return True or"),
     ("conteo no salta el host", LR, "            except _ERRORES_RED as ex:\n                _fallo_host(host, ex)\n                continue\n        if n_lance",
@@ -38,7 +45,7 @@ MUT = [
      "    for host in HOSTS:\n        url = \"https://%s/api/v2/content/details?"),
     ("sin nrt4 en hosts NASA", FE, "                   \"nrt4.modaps.eosdis.nasa.gov\")", "                   )"),
 ]
-PRUEBAS = ["tests/test_lance_respaldo_tiempo_s204.py", "tests/test_fetch_respaldo_lance_s203.py"]
+PRUEBAS = ["tests/test_lance_respaldo_residuales_s204.py", "tests/test_lance_respaldo_tiempo_s204.py", "tests/test_fetch_respaldo_lance_s203.py"]
 
 
 def h(p):
