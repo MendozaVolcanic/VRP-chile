@@ -36,6 +36,7 @@ sin pasadas que LANCE ya tenía. LANCE tiene su propio buscador espacial, indepe
 con el mismo número (`fileId`) que CMR usa en `GranuleUR` (`LANCEMODIS:<fileId>`), así que el gránulo que se arma aquí
 es el mismo archivo, con el mismo enlace, que el que habría dado CMR. Sin cambio científico.
 """
+import contextlib
 import http.client
 import json
 import math
@@ -69,15 +70,18 @@ _reloj = time.monotonic
 _ORDEN = list(HOSTS)
 
 
+@contextlib.contextmanager
 def _con_presupuesto(url, timeout):
-    """Abre `url` gastando del presupuesto del proceso; si ya se agotó, enciende el cortacircuito y no sale a la red."""
+    """Abre `url` gastando del presupuesto del proceso todo lo que dure el bloque (apertura y lectura del cuerpo); si
+    ya se agotó, enciende el cortacircuito y no sale a la red."""
     global _GASTADO, _CAIDO
     if _GASTADO >= PRESUPUESTO_S:
         _CAIDO = True
         raise LanceNoResponde("presupuesto de %d s del respaldo agotado en este proceso" % PRESUPUESTO_S)
     t0 = _reloj()
     try:
-        return _abrir(url, timeout=timeout)
+        with _abrir(url, timeout=timeout) as r:
+            yield r
     finally:
         _GASTADO += _reloj() - t0
 

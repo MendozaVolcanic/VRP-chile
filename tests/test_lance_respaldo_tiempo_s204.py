@@ -81,6 +81,23 @@ def test_respuestas_lentas_agotan_el_presupuesto_y_cortan(monkeypatch):
     assert estados.count("ok") >= 1 and estados[-1] == "error"
 
 
+def test_la_lectura_lenta_tambien_gasta_presupuesto(monkeypatch):
+    """La conexión abre al tiro pero el cuerpo tarda 29 s en llegar: ese tiempo también cuenta."""
+    reloj = _Reloj()
+
+    class _Lenta(_Resp):
+        def read(self, *a, **k):
+            reloj.t += 29.0
+            return super().read(*a, **k)
+
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", lambda url, timeout=None: _Lenta(json.dumps({"content": [ITEM]}).encode()))
+    inicio = reloj.t
+    for _ in range(96):
+        resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    assert reloj.t - inicio <= L.PRESUPUESTO_S + 2 * L.TIMEOUT_S
+
+
 def test_conteo_de_cmr_y_carpeta_cuentan_en_el_presupuesto(monkeypatch):
     """R6FL-102: el conteo a CMR y el listado de la carpeta gastan del mismo presupuesto."""
     reloj = _Reloj()
