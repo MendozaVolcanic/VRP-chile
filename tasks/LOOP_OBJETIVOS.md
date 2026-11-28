@@ -569,6 +569,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-11-28 07:50 UTC (S204): main v1.125 (#1145, #1147 a #1150); ronda 6 de Codex terminada; respaldo LANCE con presupuesto de tiempo; ícono del cráter
+- **Merges (uno.sh, ficha al mergear):** #1145 (v1.121, NO CUMPLE NHI guardado y MEJ-5), #1148 (v1.122, corrección de la
+  lectura tras la ronda 6), #1149 (v1.123, tope del job pytest 20 a 30 min), #1147 (v1.124, presupuesto de tiempo del
+  respaldo LANCE en dos bolsas, espejo colgado al final, nrt4 con tiempo de espera), #1150 (v1.125, ícono del cráter).
+- **Ronda 6 de Codex** («Sí, lánzala»): frentes L (respaldo LANCE) y N (calibrar, NHI, exceso mínimo), ciego, confrontación y
+  verificador Claude limpio cada uno; cierre con verificador. 46 filas, 0 refutadas. Gravedad 3: R6FL-108, 118, V201
+  (corregidas en #1147), R6FN-102 y V201 (corregidas en la lectura, #1148), R6C-105 (abierta, anterior al respaldo).
+  Residuales R6C-108 y V201 en #1151 (abierto, verificador APRUEBA, suite corriendo al cierre). Acta propuesta #1152
+  (borrador). Resumen `D:\codex-vrp\_salida\ronda6\RESUMEN_R6_PARA_NICOLAS.md`.
+- **Producción:** NRT 06:10 del 28-nov con #1147: 116 recuperaciones del hueco de CMR del 27-nov, 0 presupuestos agotados.
+- **Pedidos de Nicolás vía S203:** ícono del cráter (#1150, verificado en Pages) y resumen por sensor (respondido; números
+  de `D:\vrp-trabajo\temporales\s204\salida_resumen_por_sensor.txt`).
+- **Lecciones:** A112 reincidente (mutar en el worktree de una suite en curso); Python en heredoc rompió una ruta (S196).
+- Traspaso: `tasks/BLOQUE_ARRANQUE_S205.md`.
+
 ### 2026-11-27 18:20 UTC (S203): main v1.120 (#1140, #1142 a #1144); calibrar ELEGIDO s 3 y piso 0,0025; respaldo LANCE en producción; laboratorio NO CUMPLE contra NHI
 - **Merges (uno.sh, ficha al mergear):** #1140 (v1.117, manifiesto con t9 y t10), #1142 (v1.118, corrida de calibrar),
   #1143 (v1.119, respaldo de búsqueda por LANCE), #1144 (v1.120, laboratorio encendido = brazo p250; tag pre-s203-lab-piso).
