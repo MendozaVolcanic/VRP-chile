@@ -19,6 +19,7 @@ MUT = [
     ("bolsa antigua chica", LR, "PRESUPUESTO_ANTIGUO_S = 300\n", "PRESUPUESTO_ANTIGUO_S = 30\n"),
     ("una sola bolsa", LR, ".days <= 1 else \"antiguo\"", ".days <= 1 else \"reciente\""),
     ("no salta el host caído", LR, "    if _se_colgo(ex) and host in _ORDEN and _ORDEN[-1] != host:\n", "    if False:\n"),
+    ("ignora el timeout envuelto", LR, " or isinstance(getattr(ex, \"reason\", None), TimeoutError)", ""),
     ("degrada con cualquier error", LR, "    return isinstance(ex, TimeoutError) or", "    return True or"),
     ("conteo no salta el host", LR, "            except _ERRORES_RED as ex:\n                _fallo_host(host, ex)\n                continue\n        if n_lance",
      "            except _ERRORES_RED as ex:\n                continue\n        if n_lance"),

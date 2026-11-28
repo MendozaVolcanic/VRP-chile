@@ -155,6 +155,29 @@ def test_dias_viejos_no_dejan_a_hoy_sin_respaldo(monkeypatch):
     assert hoy == ["ok", "ok"]
 
 
+def test_timeout_de_conexion_envuelto_en_urlerror_tambien_salta(monkeypatch):
+    """urllib entrega el tiempo de espera de conexión como URLError(reason=TimeoutError): también es «se colgó»
+    (verificador del PR 1147, pasada 2)."""
+    import urllib.error
+    reloj = _Reloj()
+    llamadas = []
+
+    def falso(url, timeout=None):
+        host = url.split("/")[2]
+        llamadas.append(host)
+        if host.startswith("nrt3"):
+            reloj.t += L.TIMEOUT_S
+            raise urllib.error.URLError(TimeoutError("timed out"))
+        reloj.t += 1.0
+        return _Resp(json.dumps({"content": [ITEM]}).encode())
+
+    monkeypatch.setattr(L, "_reloj", reloj, raising=False)
+    monkeypatch.setattr(L, "_abrir", falso)
+    for _ in range(5):
+        resultado(lambda: L.consultar("VJ102IMG_NRT", CAJA, "2026-11-27"))
+    assert llamadas.count("nrt3.modaps.eosdis.nasa.gov") == 1
+
+
 def test_error_rapido_no_manda_el_host_al_final(monkeypatch):
     """I-2 del verificador del PR 1147: un 404 pasajero de nrt3 no deja al proceso en nrt4 para siempre."""
     reloj = _Reloj()
