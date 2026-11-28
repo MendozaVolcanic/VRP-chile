@@ -148,6 +148,7 @@ def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
     query = "products=%s&temporalRanges=%d-%03d&regions=%s" % (
         short_name, dia.year, dia.timetuple().tm_yday, urllib.parse.quote(region))
     errores = []
+    vacio = None
     bolsa = _bolsa(fecha)
     for host in list(_ORDEN):
         url = "https://%s/api/v2/content/details?%s" % (host, query)
@@ -158,8 +159,15 @@ def consultar(short_name: str, bbox: tuple, fecha: str) -> list:
             errores.append("%s: %s" % (host, ex))
             _fallo_host(host, ex)
             continue
-        return [c for c in datos.get("content", [])
-                if c.get("resourceType") == "File" and c.get("products") == short_name]
+        items = [c for c in datos.get("content", [])
+                 if c.get("resourceType") == "File" and c.get("products") == short_name]
+        # S204 (cierre de la ronda 6, R6C-108): un vacío del espejo que está de reemplazo (nrt4 adelante porque nrt3 se
+        # colgó antes) no es la última palabra: se le pregunta también al principal, que pudo haberse recuperado.
+        if items or host == HOSTS[0]:
+            return items
+        vacio = items
+    if vacio is not None:   # el reemplazo respondió vacío y el principal no respondió: vale el vacío, LANCE no está caído
+        return vacio
     _CAIDO = True
     raise LanceNoResponde("; ".join(errores))
 
@@ -306,7 +314,12 @@ def catalogo_incompleto(short_name: str, version: str, fecha: str, ahora: float 
         if n_lance is None:
             _CAIDO = True
         resultado = n_lance is not None and n_lance - n_cmr >= UMBRAL_HUECO
-    except (_ERRORES_RED + (TypeError, KeyError, LanceNoResponde)):   # LanceNoResponde: presupuesto agotado
+    except LanceNoResponde:
+        # S204 (cierre de la ronda 6, R6C-V201): sin presupuesto no se pudo medir; decir «completo» callaba la pérdida.
+        # True hace que fetch intente el respaldo, que choca con el mismo presupuesto y lo deja escrito en el log
+        # (LANCE_RESPALDO_SIN_RESPUESTA), sin salir a la red.
+        resultado = True
+    except (_ERRORES_RED + (TypeError, KeyError)):
         resultado = False
     _INCOMPLETO[clave] = resultado
     return resultado
